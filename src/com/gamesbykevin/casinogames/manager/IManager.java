@@ -1,17 +1,14 @@
-package com.gamesbykevin.casinogames.shared;
-
-import com.gamesbykevin.framework.resources.Disposable;
+package com.gamesbykevin.casinogames.manager;
 
 import com.gamesbykevin.casinogames.engine.Engine;
-
+import com.gamesbykevin.framework.resources.Disposable;
 import java.awt.Graphics;
-import java.awt.Image;
 
 /**
- * Basic methods required for game elementsMethods needed for game elements
+ * Basic methods required for game elements
  * @author GOD
  */
-public interface IElement extends Disposable
+public interface IManager extends Disposable
 {
     /**
      * Update our game element accordingly

@@ -27,7 +27,7 @@ public final class Main extends Thread
     private Engine engine;
     
     //do we hide mouse when the menu is not visible and actual gameplay started
-    public static boolean HIDE_MOUSE = true;
+    public static boolean HIDE_MOUSE = false;
     
     //how many nanoseconds bewteen each engine update
     private double nanoSecondsPerUpdate;

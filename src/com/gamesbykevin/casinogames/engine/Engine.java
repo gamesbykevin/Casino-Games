@@ -11,6 +11,7 @@ import com.gamesbykevin.framework.input.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Random;
 
 public final class Engine implements KeyListener, MouseMotionListener, MouseListener, IEngine 
 {
@@ -35,6 +36,9 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
     //object containing all of the game elements
     private Manager manager;
     
+    //object used to make random decisions
+    private Random random;
+    
     /**
      * The Engine that contains the game/menu objects
      * 
@@ -48,7 +52,6 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
         this.keyboard = new Keyboard();
         this.resources = new Resources();
     }
-    
     
     /**
      * Proper house-keeping
@@ -74,6 +77,8 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
                 manager.dispose();
             
             manager = null;
+            
+            random = null;
         }
         catch(Exception e)
         {
@@ -133,6 +138,15 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
     }
     
     /**
+     * Get our object used to make random decisions
+     * @return Random
+     */
+    public Random getRandom()
+    {
+        return this.random;
+    }
+    
+    /**
      * Here lies the logic to start a new game
      * 
      * @throws Exception 
@@ -146,6 +160,14 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
         //reset input(s)
         getKeyboard().reset();
         getMouse().reset();
+        
+        //seed used to generate random numbers
+        final long seed = System.nanoTime();
+        
+        //create new Random object
+        random = new Random(seed);
+        
+        System.out.println("Seed = " + seed);
         
         //if the manager already exists release resources
         if (manager != null)

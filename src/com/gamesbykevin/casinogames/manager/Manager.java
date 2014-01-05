@@ -1,14 +1,15 @@
 package com.gamesbykevin.casinogames.manager;
 
+import com.gamesbykevin.casinogames.game.spades.Spades;
 import com.gamesbykevin.framework.menu.Menu;
 
+import com.gamesbykevin.casinogames.deck.*;
 import com.gamesbykevin.casinogames.engine.Engine;
+import com.gamesbykevin.casinogames.game.*;
 import com.gamesbykevin.casinogames.menu.CustomMenu.*;
 import com.gamesbykevin.casinogames.menu.option.*;
 import com.gamesbykevin.casinogames.resources.*;
 import com.gamesbykevin.casinogames.resources.GameImage.Keys;
-import com.gamesbykevin.casinogames.shared.IElement;
-
 
 import java.awt.Graphics;
 import java.awt.Image;
@@ -19,13 +20,10 @@ import java.util.Random;
  * The parent class that contains all of the game elements
  * @author GOD
  */
-public final class Manager implements IElement
+public final class Manager implements IManager
 {
-    //seed used to generate random numbers
-    private final long seed = System.nanoTime();
-    
-    //random number generator object
-    private Random random = new Random(seed);
+    //if we are playing spades
+    private Spades spades;
     
     /**
      * Constructor for Manager, this is the point where we load any menu option configurations
@@ -34,30 +32,17 @@ public final class Manager implements IElement
      */
     public Manager(final Engine engine) throws Exception
     {
-        /*
-        //store the size of the screen
-        screen = new Rectangle(engine.getMain().getScreen());
+        //create new spades game
+        spades = new Spades(engine);
         
-        //get the background image
-        background = engine.getResources().getGameImage(Keys.Background);
+        //store the size of the screen
+        //screen = new Rectangle(engine.getMain().getScreen());
         
         //get the menu object
         final Menu menu = engine.getMenu();
         
-        //get the index 
+        //get the index
         final int modeIndex = menu.getOptionSelectionIndex(LayerKey.Options, OptionKey.Mode);
-        */
-        
-        System.out.println("Seed - " + seed);
-    }
-    
-    /**
-     * Get our object used to make random decisions
-     * @return Random
-     */
-    public Random getRandom()
-    {
-        return this.random;
     }
     
     /**
@@ -66,7 +51,7 @@ public final class Manager implements IElement
     @Override
     public void dispose()
     {
-        random = null;
+        
     }
     
     /**
@@ -78,7 +63,8 @@ public final class Manager implements IElement
     @Override
     public void update(final Engine engine) throws Exception
     {
-        
+        if (spades != null)
+            spades.update(engine);
     }
     
     /**
@@ -88,6 +74,7 @@ public final class Manager implements IElement
     @Override
     public void render(final Graphics graphics)
     {
-        
+        if (spades != null)
+            spades.render(graphics);
     }
 }
