@@ -32,19 +32,17 @@ public final class Spades extends CardGame implements ICardGame
     //each player is dealt x cards
     private static final int HAND_LIMIT = 13;
     
-    //place where cards are to be placed
-    private Hand cardDestination;
-    
     public Spades(final Engine engine) throws Exception
     {
         super(engine);
         
-        //create new hand
-        cardDestination = new Hand();
+        //add place for players to put their cards when playing
+        super.getCardDestinations().add(new Hand());
+        
         
         //set area where cards can be placed
-        cardDestination.setLocation(250, 200);
-        cardDestination.setDimensions(100, 100);
+        super.getCardDestinations().get(0).setLocation(250, 200);
+        super.getCardDestinations().get(0).setDimensions(100, 100);
         
         //add our 4 players
         super.getPlayers().add(new Guest());
@@ -96,9 +94,6 @@ public final class Spades extends CardGame implements ICardGame
     public void dispose()
     {
         super.dispose();
-        
-        cardDestination.dispose();
-        cardDestination = null;
     }
     
     @Override
@@ -234,13 +229,13 @@ public final class Spades extends CardGame implements ICardGame
                 final Card card = guest.getHand().getActiveCard();
 
                 //if the active card equals the place card area then we can place the card
-                if (cardDestination.getRectangle().contains(card.getCenter()))
+                if (super.getCardDestinations().get(0).getRectangle().contains(card.getCenter()))
                 {
                     //mark the location of the card as the destination
                     card.setDestination(card.getPoint());
                     
                     //add card to destination
-                    cardDestination.add(card);
+                    super.getCardDestinations().get(0).add(card);
                     
                     //remove card from the players hand
                     guest.getHand().remove(card);
@@ -262,7 +257,5 @@ public final class Spades extends CardGame implements ICardGame
     {
         //draw deck and player cards
         super.render(graphics);
-        
-        cardDestination.render(graphics, getDeck().getImage());
     }
 }

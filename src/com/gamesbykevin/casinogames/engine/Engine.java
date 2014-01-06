@@ -1,11 +1,12 @@
 package com.gamesbykevin.casinogames.engine;
 
-import com.gamesbykevin.casinogames.resources.AllFonts;
-import com.gamesbykevin.casinogames.resources.Resources;
-import com.gamesbykevin.casinogames.resources.MenuImage;
 import com.gamesbykevin.casinogames.main.Main;
 import com.gamesbykevin.casinogames.manager.Manager;
 import com.gamesbykevin.casinogames.menu.CustomMenu;
+import com.gamesbykevin.casinogames.resources.AllFonts;
+import com.gamesbykevin.casinogames.resources.Resources;
+import com.gamesbykevin.casinogames.resources.MenuImage;
+import com.gamesbykevin.casinogames.shared.Shared;
 
 import com.gamesbykevin.framework.input.*;
 
@@ -237,7 +238,7 @@ public final class Engine implements KeyListener, MouseMotionListener, MouseList
             menu.render(graphics);
 
         //if menu is finished and we don't want to hide mouse cursor then draw it, or if the menu is not finished show mouse
-        if (menu.hasFinished() && !Main.HIDE_MOUSE || !menu.hasFinished())
+        if (menu.hasFinished() && !Shared.HIDE_MOUSE || !menu.hasFinished())
         {
             if (mouse.getLocation() != null)
             {

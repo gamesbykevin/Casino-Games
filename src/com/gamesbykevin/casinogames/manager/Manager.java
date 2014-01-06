@@ -1,5 +1,6 @@
 package com.gamesbykevin.casinogames.manager;
 
+import com.gamesbykevin.casinogames.game.CardGame;
 import com.gamesbykevin.casinogames.game.spades.Spades;
 import com.gamesbykevin.framework.menu.Menu;
 
@@ -43,6 +44,15 @@ public final class Manager implements IManager
         
         //get the index
         final int modeIndex = menu.getOptionSelectionIndex(LayerKey.Options, OptionKey.Mode);
+    }
+    
+    /**
+     * Get our card game object
+     * @return 
+     */
+    public CardGame getCardGame()
+    {
+        return this.spades;
     }
     
     /**

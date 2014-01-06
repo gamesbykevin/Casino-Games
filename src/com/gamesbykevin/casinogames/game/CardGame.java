@@ -33,6 +33,9 @@ public abstract class CardGame extends Sprite implements Disposable
     //our object containing all players
     private List<Player> players;
     
+    //this is a place holder for cards (example the central place where all players place their cards when playing spades)
+    private List<Hand> cardDestinations;
+    
     /**
      * Create a new card game
      * @param engine Our main game engine
@@ -49,23 +52,31 @@ public abstract class CardGame extends Sprite implements Disposable
         
         //create our player list
         this.players = new ArrayList<>();
+        
+        //create our card destination(s) list
+        this.cardDestinations = new ArrayList<>();
+    }
+    
+    public List<Hand> getCardDestinations()
+    {
+        return this.cardDestinations;
     }
     
     /**
      * Get the player that has been marked by the current turn index
      * @return Player marked as current
      */
-    protected Player getPlayer()
+    public Player getPlayer()
     {
         return getPlayer(getTurnIndex());
     }
     
-    protected Player getPlayer(final int index)
+    public Player getPlayer(final int index)
     {
         return players.get(index);
     }
     
-    protected List<Player> getPlayers()
+    public List<Player> getPlayers()
     {
         return this.players;
     }
@@ -79,7 +90,7 @@ public abstract class CardGame extends Sprite implements Disposable
         return this.turnIndex;
     }
     
-    protected void setTurnIndex(final int turnIndex)
+    public void setTurnIndex(final int turnIndex)
     {
         this.turnIndex = turnIndex;
     }
@@ -88,7 +99,7 @@ public abstract class CardGame extends Sprite implements Disposable
      * Determine who is the next player to select going from one index to the next.
      * Once we reach the end we restart back at 0.
      */
-    protected void changeTurnIndex()
+    public void changeTurnIndex()
     {
         if (turnIndex < players.size() - 1)
         {
@@ -184,6 +195,28 @@ public abstract class CardGame extends Sprite implements Disposable
         
         deck.dispose();
         deck = null;
+        
+        for (Player player : getPlayers())
+        {
+            if (player != null)
+                player.dispose();
+            
+            player = null;
+        }
+        
+        this.players.clear();
+        this.players = null;
+        
+        for (Hand hand : getCardDestinations())
+        {
+            if (hand != null)
+                hand.dispose();
+            
+            hand = null;
+        }
+        
+        this.cardDestinations.clear();
+        this.cardDestinations = null;
     }
     
     public void render(final Graphics graphics)
@@ -191,16 +224,20 @@ public abstract class CardGame extends Sprite implements Disposable
         //draw the deck first
         getDeck().render(graphics);
         
-        if (getPlayers() != null && !getPlayers().isEmpty())
+        //now draw all the players hands
+        for (Player player : getPlayers())
         {
-            for (Player player : getPlayers())
+            if (player != null)
             {
-                if (player != null)
-                {
-                    //draw the players hand
-                    player.render(graphics, getDeck().getImage());
-                }
+                //draw the players hand
+                player.render(graphics, getDeck().getImage());
             }
+        }
+        
+        //finally draw the destination(s)
+        for (Hand hand : getCardDestinations())
+        {
+            hand.render(graphics, image);
         }
     }
 }

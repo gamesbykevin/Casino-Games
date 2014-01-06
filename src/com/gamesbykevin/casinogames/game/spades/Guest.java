@@ -19,35 +19,43 @@ public final class Guest extends Player implements IPlayer
     @Override
     public void update(final Engine engine)
     {
-        if (hasCardSelected())
+        //if the player is human check for mouse input
+        if (isHuman())
         {
-            //if user has let go of mouse
-            if (engine.getMouse().isMouseReleased())
+            if (hasCardSelected())
             {
-                //we are no longer selecting a card
-                resetCardSelected();
+                //if user has let go of mouse
+                if (engine.getMouse().isMouseReleased())
+                {
+                    //we are no longer selecting a card
+                    resetCardSelected();
 
-                //reset mouse events
-                engine.getMouse().reset();
+                    //reset mouse events
+                    engine.getMouse().reset();
+                }
+
+                //user dragged mouse so move card with it
+                if (engine.getMouse().isMouseDragged())
+                {
+                    final int x = (int)(engine.getMouse().getLocation().x - (getHand().get(getCardSelectedIndex()).getWidth() / 2));
+                    final int y = (int)(engine.getMouse().getLocation().y - (getHand().get(getCardSelectedIndex()).getHeight() / 2));
+
+                    getHand().get(getCardSelectedIndex()).setLocation(x, y);
+                }
             }
-
-            //user dragged mouse so move card with it
-            if (engine.getMouse().isMouseDragged())
+            else
             {
-                final int x = (int)(engine.getMouse().getLocation().x - (getHand().get(getCardSelectedIndex()).getWidth() / 2));
-                final int y = (int)(engine.getMouse().getLocation().y - (getHand().get(getCardSelectedIndex()).getHeight() / 2));
-
-                getHand().get(getCardSelectedIndex()).setLocation(x, y);
+                //has the mouse been pressed
+                if (engine.getMouse().isMousePressed())
+                {
+                    //set the selected card based on the mouse location
+                    setCardSelected(super.getHand().getIndex(engine.getMouse().getLocation()));
+                }
             }
         }
         else
         {
-            //has the mouse been pressed
-            if (engine.getMouse().isMousePressed())
-            {
-                //set the selected card based on the mouse location
-                setCardSelected(super.getHand().getIndex(engine.getMouse().getLocation()));
-            }
+            //engine.getManager().getCardGame()
         }
     }
     

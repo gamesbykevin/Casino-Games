@@ -26,9 +26,6 @@ public final class Main extends Thread
     //our main game engine
     private Engine engine;
     
-    //do we hide mouse when the menu is not visible and actual gameplay started
-    public static boolean HIDE_MOUSE = false;
-    
     //how many nanoseconds bewteen each engine update
     private double nanoSecondsPerUpdate;
     
@@ -161,6 +158,9 @@ public final class Main extends Thread
                     updates = 0;
                     frames = 0;
                 }
+                
+                //sleep for 1,000 nanoseconds by default to give our thread a short break
+                Thread.sleep(0, 1000);
             }
             catch(Exception e)
             {

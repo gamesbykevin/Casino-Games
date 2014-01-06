@@ -10,7 +10,7 @@ import java.awt.image.BufferedImage;
  * 
  * @author GOD
  */
-public class Shared 
+public final class Shared 
 {
     //these dimensions is the size of the game window the user will see
     public static final int INITIAL_WIDTH  = 600;
@@ -22,6 +22,9 @@ public class Shared
     
     //show UPS/FPS counters
     public static final boolean DEBUG = true;
+    
+    //do we hide mouse when the menu is not visible and actual gameplay started
+    public static boolean HIDE_MOUSE = false;
     
     //how many updates per second, controls speed of game
     public static final int DEFAULT_UPS = 90;
