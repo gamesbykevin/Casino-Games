@@ -257,7 +257,7 @@ public final class Card extends Sprite
         Graphics2D g2d = (Graphics2D)graphics;
         
         //reset object used to rotate graphics
-        transform.setToIdentity();;
+        transform.setToIdentity();
             
         switch(getDisplay())
         {

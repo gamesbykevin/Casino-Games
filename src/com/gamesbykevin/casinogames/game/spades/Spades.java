@@ -6,7 +6,6 @@ import com.gamesbykevin.casinogames.deck.Hand.CardDisplay;
 import com.gamesbykevin.casinogames.engine.Engine;
 import com.gamesbykevin.casinogames.game.CardGame;
 import com.gamesbykevin.casinogames.game.ICardGame;
-import com.gamesbykevin.casinogames.player.Player;
 import com.gamesbykevin.casinogames.resources.GameImage;
 
 import java.awt.Graphics;
@@ -20,9 +19,12 @@ public final class Spades extends CardGame implements ICardGame
     //we only need the width because we calculate the height by the ratio
     private static final int CARD_WIDTH = 100;
     
+    //this is the score to win
+    private static final int SCORE_FINISH = 500;
+    
     //the speed at which the cards move while dealing
-    private static final int DEAL_PIXEL_SPEED_X = 100;
-    private static final int DEAL_PIXEL_SPEED_Y = 100;
+    private static final int DEAL_PIXEL_SPEED_X = 15;
+    private static final int DEAL_PIXEL_SPEED_Y = 15;
     
     //where the deck will be located
     private static final Point DECK_LOCATION = new Point(350, 195);
@@ -30,9 +32,23 @@ public final class Spades extends CardGame implements ICardGame
     //each player is dealt x cards
     private static final int HAND_LIMIT = 13;
     
+    //steps to follow in this game
+    private enum Steps
+    {
+        Deal,
+        PlaceBet,
+        Play,
+        CheckWin,
+        AnimateWin,
+        CheckFinish
+    }
+    
     public Spades(final Engine engine) throws Exception
     {
         super(engine);
+        
+        //set the current step
+        super.setStep(Steps.Deal);
         
         //create area for players to place their cards
         final Hand destination = new Hand();
@@ -70,21 +86,25 @@ public final class Spades extends CardGame implements ICardGame
         reset(engine.getRandom());
         
         //player 1, south and this will be our human
-        super.getPlayer(0).getHand().setLocation(170, 375);
-        super.getPlayer(0).getHand().setDisplay(CardDisplay.Horizontal);
-        super.getPlayer(0).setHuman(true);
+        Guest player1 = (Guest)super.getPlayer(0);
+        player1.getHand().setLocation(170, 375);
+        player1.getHand().setDisplay(CardDisplay.Horizontal);
+        player1.setHuman(true);
         
         //player 2, west
-        super.getPlayer(1).getHand().setLocation(25, 25);
-        super.getPlayer(1).getHand().setDisplay(CardDisplay.Vertical);
+        Guest player2 = (Guest)super.getPlayer(1);
+        player2.getHand().setLocation(25, 25);
+        player2.getHand().setDisplay(CardDisplay.Vertical);
         
         //player 3, north
-        super.getPlayer(2).getHand().setLocation(170, 20);
-        super.getPlayer(2).getHand().setDisplay(CardDisplay.Horizontal);
+        Guest player3 = (Guest)super.getPlayer(2);
+        player3.getHand().setLocation(170, 20);
+        player3.getHand().setDisplay(CardDisplay.Horizontal);
         
         //player 4, east
-        super.getPlayer(3).getHand().setLocation(675, 25);
-        super.getPlayer(3).getHand().setDisplay(CardDisplay.Vertical);
+        Guest player4 = (Guest)super.getPlayer(3);
+        player4.getHand().setLocation(675, 25);
+        player4.getHand().setDisplay(CardDisplay.Vertical);
     }
     
     /**
@@ -122,12 +142,12 @@ public final class Spades extends CardGame implements ICardGame
                 case Hearts:
                 case Diamonds:
                 case Clubs:
-                    card.getSuit().setRank(0);
+                    card.getSuit().setRank(1);
                     break;
                     
                 //since we are playing spades the spades suit has the highest rank
                 case Spades:
-                    card.getSuit().setRank(1);
+                    card.getSuit().setRank(2);
                     break;
                     
                 default:
@@ -233,7 +253,7 @@ public final class Spades extends CardGame implements ICardGame
     public void deal(final Random random)
     {
         //get the current player we are dealing to
-        Player player = getPlayer();
+        Guest player = (Guest)getPlayer();
         
         //if the player has an active card that has not yet reached the destination
         if (player.getHand().hasActiveCard())
@@ -265,15 +285,9 @@ public final class Spades extends CardGame implements ICardGame
 
                 //set the card to be placed where the player is
                 card.setDestination(player.getHand().getDestination(CARD_WIDTH));
-
-                //mark the card as belonging to the player
-                card.setPlayerId(player.getId());
-                
-                //set the display for the card
-                card.setDisplay(player.getHand().getDisplay());
                 
                 //add card to player hand
-                player.getHand().add(card);
+                player.addHand(card);
 
                 //remove card from deck
                 getDeck().getHand().remove(card);
@@ -281,59 +295,141 @@ public final class Spades extends CardGame implements ICardGame
         }
         
         //check if we are finished dealing cards to every player
-        for (Player tmp : getPlayers())
+        for (Object obj : getPlayers())
         {
+            Guest tmp = (Guest)obj;
+            
             //if the player reached the limit we are not finished dealing yet
             if (!tmp.getHand().hasLimit(HAND_LIMIT) || tmp.getHand().hasActiveCard())
-            {
-                //we are not finished yet
-                super.setDeal(true);
-                
-                //don't continue
                 return;
-            }
         }
         
         //for now the first player will have the first turn
         super.setTurnIndex(0);
         
-        //we made it to this point so dealing is finished
-        super.setDeal(false);
+        //dealing is finished so we need to set the next step
+        super.setStep(Steps.Play);
     }
     
     @Override
     public void checkFinish()
     {
+        for (Object obj : getPlayers())
+        {
+            //if a player has reached the final score the game is over
+            if (((Guest)obj).getScore() >= SCORE_FINISH)
+            {
+                
+            }
+        }
+    }
+    
+    /**
+     * Here we will check to see who won the hand
+     */
+    private void checkWin()
+    {
+        //get the destination with all of the players cards
+        final Hand destination = super.getCardDestinations().get(0);
         
+        //determine who is the winner, starting with the initial card that was placed
+        Card winner = destination.getCards().get(0);
+        
+        //check each card to determine the winner
+        for (Card card : destination.getCards())
+        {
+            //if the suit matches the winner and the cards rank is higher
+            if (card.equalsSuit(winner.getSuit()) && card.getValue().getRank() > winner.getValue().getRank())
+                winner = card;
+            
+            //if the cards suit rankk is higher than the winner
+            if (card.getSuit().getRank() > winner.getSuit().getRank())
+                winner = card;
+        }
+        
+        //now that we have the winning card determine the player that won
+        for (Object obj : getPlayers())
+        {
+            Guest player = ((Guest)obj);
+            
+            //if this is the player add a win, and only 1 player can win at a time
+            if (player.getId() == winner.getPlayerId())
+            {
+                //add win
+                player.addWin();
+                
+                //now we need to simulate all of the cards to go to the winner
+                for (Card card : destination.getCards())
+                {
+                    //set the destination to the location of one of the remaining cards in the players hand
+                    card.setDestination(player.getHand().get(0).getPoint());
+                }
+                
+                //set the next step
+                super.setStep(Steps.AnimateWin);
+                
+                //the player that wins needs to go first
+                super.setTurnIndex(player.getId());
+                
+                //no need to continue for now
+                break;
+            }
+        }
+    }
+    
+    /**
+     * This method simply makes all the existing cards move to the winning player
+     */
+    private void animateWin()
+    {
+        //get the destination with all of the players cards
+        final Hand destination = super.getCardDestinations().get(0);
+        
+        //if we have any cards not at the destination yet
+        if (destination.hasActiveCard())
+        {
+            //move each card towards destination at same time
+            destination.moveActiveCards(DEAL_PIXEL_SPEED_X, DEAL_PIXEL_SPEED_Y);
+        }
+        else
+        {
+            //no more cards are active clear list
+            destination.getCards().clear();
+            
+            //change step to play
+            super.setStep(Steps.Play);
+        }
     }
     
     @Override
     public void update(final Engine engine) throws Exception
     {
-        //if we are to deal cards
-        if (hasDeal())
+        switch((Steps)getStep())
         {
-            //deal cards out to players
-            deal(engine.getRandom());
-        }
-        else
-        {
-            //deal has finished next is to place bets
-            
-            
-            
-            //once bets are placed we can start game
-            
-            
-            //after game finishes determine if there is a winner
-            
-            
-            //if no winner a new deck needs to be created and continue until winning score is reached
-            
-            
-            
-            //update the player who has the current turn
-            ((Guest)getPlayer()).update(engine);
+            case Deal:
+                
+                //deal cards out to players
+                deal(engine.getRandom());
+                break;
+                
+            case Play:
+                
+                //update the current player that has a turn
+                ((Guest)getPlayer()).update(engine);
+                
+                //if each player has placed a card
+                if (getCardDestinations().get(0).getSize() == getPlayers().size())
+                    super.setStep(Steps.CheckWin);
+                
+                break;
+                
+            case CheckWin:
+                checkWin();
+                break;
+                
+            case AnimateWin:
+                animateWin();
+                break;
         }
     }
     

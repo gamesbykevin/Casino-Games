@@ -147,14 +147,13 @@ public final class Hand extends Sprite implements Disposable
     }
     
     /**
-     * Move the active card towards the destination.
-     * @param velocityX x pixel speed
-     * @param velocityY y pixel speed
+     * Move the card towards the destination a x amount of speed
+     * @param card Card we want to move towards destination
+     * @param velocityX x pixels
+     * @param velocityY y pixels
      */
-    public void moveActiveCard(final int velocityX, final int velocityY)
+    public void moveCard(final Card card, final int velocityX, final int velocityY)
     {
-        final Card card = getActiveCard();
-
         //the pixel distance
         int xDifference = (int)(card.getX() - card.getDestination().x);
         int yDifference = (int)(card.getY() - card.getDestination().y);
@@ -179,7 +178,29 @@ public final class Hand extends Sprite implements Disposable
             card.setX(card.getX() - velocityX);
         if (card.getY() > card.getDestination().y)
             card.setY(card.getY() - velocityY);
-        
+    }
+    
+    /**
+     * Move the active card towards the destination.
+     * @param velocityX x pixel speed
+     * @param velocityY y pixel speed
+     */
+    public void moveActiveCard(final int velocityX, final int velocityY)
+    {
+        moveCard(getActiveCard(), velocityX, velocityY);
+    }
+    
+    /**
+     * Move all of the cards toward their destination.
+     * @param velocityX x pixel speed
+     * @param velocityY y pixel speed
+     */
+    public void moveActiveCards(final int velocityX, final int velocityY)
+    {
+        for (Card card : getCards())
+        {
+            moveCard(card, velocityX, velocityY);
+        }
     }
     
     /**

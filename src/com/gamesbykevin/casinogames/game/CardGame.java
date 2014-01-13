@@ -24,14 +24,14 @@ public abstract class CardGame extends Sprite implements Disposable
     //store the type of deck that will be used
     private final Keys type;
     
-    //should we deal cards
-    private boolean deal = true;
+    //this will determine where we are in the entire process
+    private Object step;
     
     //the player that has the current turn
     private int turnIndex = 0;
     
     //our object containing all players
-    private List<Player> players;
+    private List<Object> players;
     
     //this is a place holder for cards (example the central place where all players place their cards when playing spades)
     private List<Hand> cardDestinations;
@@ -68,6 +68,16 @@ public abstract class CardGame extends Sprite implements Disposable
         this.cardDestinations = new ArrayList<>();
     }
     
+    public void setStep(final Object step)
+    {
+        this.step = step;
+    }
+    
+    public Object getStep()
+    {
+        return this.step;
+    }
+    
     public List<Hand> getCardDestinations()
     {
         return this.cardDestinations;
@@ -77,17 +87,17 @@ public abstract class CardGame extends Sprite implements Disposable
      * Get the player that has been marked by the current turn index
      * @return Player marked as current
      */
-    public Player getPlayer()
+    public Object getPlayer()
     {
         return getPlayer(getTurnIndex());
     }
     
-    public Player getPlayer(final int index)
+    public Object getPlayer(final int index)
     {
         return players.get(index);
     }
     
-    public List<Player> getPlayers()
+    public List<Object> getPlayers()
     {
         return this.players;
     }
@@ -104,6 +114,22 @@ public abstract class CardGame extends Sprite implements Disposable
     public void setTurnIndex(final int turnIndex)
     {
         this.turnIndex = turnIndex;
+    }
+    
+    /**
+     * Sets the player with the matching playerId to have the current turn
+     * @param playerId Unique id of player
+     */
+    public void setTurnIndex(final long playerId)
+    {
+        for (int index = 0; index < players.size(); index++)
+        {
+            if (((Player)getPlayer(index)).getId() == playerId)
+            {
+                setTurnIndex(index);
+                break;
+            }
+        }
     }
     
     /**
@@ -184,20 +210,6 @@ public abstract class CardGame extends Sprite implements Disposable
         return this.deck;
     }
     
-    /**
-     * Do we continue to deal cards.
-     * @param deal True if we are to deal cards, otherwise false.
-     */
-    protected void setDeal(final boolean deal)
-    {
-        this.deal = deal;
-    }
-    
-    protected boolean hasDeal()
-    {
-        return this.deal;
-    }
-    
     @Override
     public void dispose()
     {
@@ -207,10 +219,10 @@ public abstract class CardGame extends Sprite implements Disposable
         deck.dispose();
         deck = null;
         
-        for (Player player : getPlayers())
+        for (Object player : getPlayers())
         {
             if (player != null)
-                player.dispose();
+                ((Player)player).dispose();
             
             player = null;
         }
@@ -241,16 +253,13 @@ public abstract class CardGame extends Sprite implements Disposable
             hand.render(graphics, getDeck().getImage());
         }
         
-        for (Player player : getPlayers())
+        for (Object player : getPlayers())
         {
             if (player != null)
             {
                 //draw the players hand
-                player.render(graphics, getDeck().getImage());
+                ((Player)player).render(graphics, getDeck().getImage());
             }
         }
-        
-        //draw player  who has a current turn last
-        //getPlayer().render(graphics, getDeck().getImage());
     }
 }

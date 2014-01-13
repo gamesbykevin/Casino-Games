@@ -3,6 +3,7 @@ package com.gamesbykevin.casinogames.player;
 import com.gamesbykevin.framework.base.Sprite;
 import com.gamesbykevin.framework.resources.Disposable;
 
+import com.gamesbykevin.casinogames.deck.Card;
 import com.gamesbykevin.casinogames.deck.Hand;
 import com.gamesbykevin.casinogames.engine.Engine;
 
@@ -18,11 +19,14 @@ public abstract class Player extends Sprite implements Disposable
     private boolean human = false;
     
     //unique number to identify each player
-    private static final long id = System.nanoTime();
+    private final long id;
     
     protected Player()
     {
         hand = new Hand();
+        
+        //set the unique id
+        id  = System.nanoTime();
     }
     
     /**
@@ -68,6 +72,21 @@ public abstract class Player extends Sprite implements Disposable
     public Hand getHand()
     {
         return this.hand;
+    }
+    
+    /**
+     * Add this card to the players hand
+     * @param card The card we want to add
+     */
+    public void addHand(final Card card)
+    {
+        //assign player id so we know who the card belongs to
+        card.setPlayerId(getId());
+        
+        //set the display for the card
+        card.setDisplay(getHand().getDisplay());
+        
+        getHand().add(card);
     }
     
     /**

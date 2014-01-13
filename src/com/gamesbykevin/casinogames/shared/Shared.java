@@ -30,7 +30,7 @@ public final class Shared
     public static final int DEFAULT_UPS = 120;
     
     //how many frames per second, controls how many images are rendered
-    public static final int DEFAULT_FPS = 60;
+    public static final int DEFAULT_FPS = 30;
     
     //what is the name of our game
     public static final String GAME_NAME = "Casino Games";
