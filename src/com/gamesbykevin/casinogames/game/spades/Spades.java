@@ -6,13 +6,11 @@ import com.gamesbykevin.casinogames.deck.Hand.CardDisplay;
 import com.gamesbykevin.casinogames.engine.Engine;
 import com.gamesbykevin.casinogames.game.CardGame;
 import com.gamesbykevin.casinogames.game.ICardGame;
-import com.gamesbykevin.casinogames.game.spades.Guest;
 import com.gamesbykevin.casinogames.player.Player;
-import java.awt.Color;
+import com.gamesbykevin.casinogames.resources.GameImage;
 
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -20,14 +18,14 @@ import java.util.Random;
 public final class Spades extends CardGame implements ICardGame
 {
     //we only need the width because we calculate the height by the ratio
-    private static final int CARD_WIDTH = 80;
+    private static final int CARD_WIDTH = 100;
     
-    //the speed at which the cards can move
-    private static final int PIXEL_SPEED_X = 15;
-    private static final int PIXEL_SPEED_Y = 15;
+    //the speed at which the cards move while dealing
+    private static final int DEAL_PIXEL_SPEED_X = 100;
+    private static final int DEAL_PIXEL_SPEED_Y = 100;
     
     //where the deck will be located
-    private static final Point DECK_LOCATION = new Point(260, 210);
+    private static final Point DECK_LOCATION = new Point(350, 195);
     
     //each player is dealt x cards
     private static final int HAND_LIMIT = 13;
@@ -36,13 +34,31 @@ public final class Spades extends CardGame implements ICardGame
     {
         super(engine);
         
-        //add place for players to put their cards when playing
-        super.getCardDestinations().add(new Hand());
-        
+        //create area for players to place their cards
+        final Hand destination = new Hand();
         
         //set area where cards can be placed
-        super.getCardDestinations().get(0).setLocation(250, 200);
-        super.getCardDestinations().get(0).setDimensions(100, 100);
+        destination.setLocation(250, 175);
+        destination.setDimensions(300, 150);
+        
+        //set background image for destination
+        destination.setImage(engine.getResources().getGameImage(GameImage.Keys.CardPlaceHolder));
+        
+        //add all background image possibilities
+        final List<GameImage.Keys> keys = new ArrayList<>();
+        keys.add(GameImage.Keys.Background1);
+        keys.add(GameImage.Keys.Background2);
+        keys.add(GameImage.Keys.Background3);
+        keys.add(GameImage.Keys.Background4);
+        keys.add(GameImage.Keys.Background5);
+        keys.add(GameImage.Keys.Background6);
+        
+        //set the background image
+        super.setImage(engine.getResources().getGameImage(keys.get(engine.getRandom().nextInt(keys.size()))));
+        super.setDimensions(super.getImage().getWidth(null), super.getImage().getHeight(null));
+        
+        //add place for players to put their cards when playing
+        super.getCardDestinations().add(destination);
         
         //add our 4 players
         super.getPlayers().add(new Guest());
@@ -54,20 +70,20 @@ public final class Spades extends CardGame implements ICardGame
         reset(engine.getRandom());
         
         //player 1, south and this will be our human
-        super.getPlayer(0).getHand().setLocation(120, 400);
+        super.getPlayer(0).getHand().setLocation(170, 375);
         super.getPlayer(0).getHand().setDisplay(CardDisplay.Horizontal);
         super.getPlayer(0).setHuman(true);
         
         //player 2, west
-        super.getPlayer(1).getHand().setLocation(25, 100);
+        super.getPlayer(1).getHand().setLocation(25, 25);
         super.getPlayer(1).getHand().setDisplay(CardDisplay.Vertical);
         
         //player 3, north
-        super.getPlayer(2).getHand().setLocation(120, 20);
+        super.getPlayer(2).getHand().setLocation(170, 20);
         super.getPlayer(2).getHand().setDisplay(CardDisplay.Horizontal);
         
         //player 4, east
-        super.getPlayer(3).getHand().setLocation(500, 100);
+        super.getPlayer(3).getHand().setLocation(675, 25);
         super.getPlayer(3).getHand().setDisplay(CardDisplay.Vertical);
     }
     
@@ -97,6 +113,88 @@ public final class Spades extends CardGame implements ICardGame
     }
     
     @Override
+    public void assignRank() throws Exception
+    {
+        for (Card card : getDeck().getHand().getCards())
+        {
+            switch (card.getSuit())
+            {
+                case Hearts:
+                case Diamonds:
+                case Clubs:
+                    card.getSuit().setRank(0);
+                    break;
+                    
+                //since we are playing spades the spades suit has the highest rank
+                case Spades:
+                    card.getSuit().setRank(1);
+                    break;
+                    
+                default:
+                    throw new Exception("Suit not found");
+            }
+            
+            switch (card.getValue())
+            {
+                case Two:
+                    card.getValue().setRank(0);
+                    break;
+                        
+                case Three:
+                    card.getValue().setRank(1);
+                    break;
+                        
+                case Four:
+                    card.getValue().setRank(2);
+                    break;
+                        
+                case Five:
+                    card.getValue().setRank(3);
+                    break;
+                        
+                case Six:
+                    card.getValue().setRank(4);
+                    break;
+                        
+                case Seven:
+                    card.getValue().setRank(5);
+                    break;
+                        
+                case Eight:
+                    card.getValue().setRank(6);
+                    break;
+                        
+                case Nine:
+                    card.getValue().setRank(7);
+                    break;
+                        
+                case Ten:
+                    card.getValue().setRank(8);
+                    break;
+                        
+                case Jack:
+                    card.getValue().setRank(9);
+                    break;
+                        
+                case Queen:
+                    card.getValue().setRank(10);
+                    break;
+                        
+                case King:
+                    card.getValue().setRank(11);
+                    break;
+                    
+                case Ace:
+                    card.getValue().setRank(12);
+                    break;
+                    
+                default:
+                    throw new Exception("Value not found");
+            }
+        }
+    }
+    
+    @Override
     public void createDeck() throws Exception
     {
         //set the location of the deck
@@ -111,6 +209,9 @@ public final class Spades extends CardGame implements ICardGame
                 super.getDeck().add(suit, value);
             }
         }
+        
+        //now that deck is created assign rank to each card
+        assignRank();
     }
     
     @Override
@@ -137,7 +238,7 @@ public final class Spades extends CardGame implements ICardGame
         //if the player has an active card that has not yet reached the destination
         if (player.getHand().hasActiveCard())
         {
-            player.getHand().moveActiveCard(PIXEL_SPEED_X, PIXEL_SPEED_Y);
+            player.getHand().moveActiveCard(DEAL_PIXEL_SPEED_X, DEAL_PIXEL_SPEED_Y);
             
             //if the card has now been placed
             if (!player.getHand().hasActiveCard())
@@ -167,6 +268,9 @@ public final class Spades extends CardGame implements ICardGame
 
                 //mark the card as belonging to the player
                 card.setPlayerId(player.getId());
+                
+                //set the display for the card
+                card.setDisplay(player.getHand().getDisplay());
                 
                 //add card to player hand
                 player.getHand().add(card);
@@ -214,47 +318,31 @@ public final class Spades extends CardGame implements ICardGame
         }
         else
         {
-            //get the player who has the current turn
-            Guest guest = ((Guest)getPlayer());
+            //deal has finished next is to place bets
             
-            //does the player have a card selected
-            boolean selected = guest.hasCardSelected();
             
-            //update player
-            guest.update(engine);
             
-            //if the player does not have a card selected and previously did so lets see where it needs to be placed
-            if (!guest.hasCardSelected() && selected)
-            {
-                final Card card = guest.getHand().getActiveCard();
-
-                //if the active card equals the place card area then we can place the card
-                if (super.getCardDestinations().get(0).getRectangle().contains(card.getCenter()))
-                {
-                    //mark the location of the card as the destination
-                    card.setDestination(card.getPoint());
-                    
-                    //add card to destination
-                    super.getCardDestinations().get(0).add(card);
-                    
-                    //remove card from the players hand
-                    guest.getHand().remove(card);
-                    
-                    //no longer turn so change
-                    super.changeTurnIndex();
-                }
-            }
-            else
-            {
-                if (guest.getHand().hasActiveCard())
-                    guest.getHand().moveActiveCard(PIXEL_SPEED_X, PIXEL_SPEED_Y);
-            }
+            //once bets are placed we can start game
+            
+            
+            //after game finishes determine if there is a winner
+            
+            
+            //if no winner a new deck needs to be created and continue until winning score is reached
+            
+            
+            
+            //update the player who has the current turn
+            ((Guest)getPlayer()).update(engine);
         }
     }
     
     @Override
     public void render(final Graphics graphics)
     {
+        //draw the background
+        super.draw(graphics);
+        
         //draw deck and player cards
         super.render(graphics);
     }

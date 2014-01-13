@@ -3,9 +3,7 @@ package com.gamesbykevin.casinogames.deck;
 import com.gamesbykevin.framework.base.Sprite;
 import com.gamesbykevin.framework.resources.Disposable;
 
-import java.awt.geom.AffineTransform;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -19,9 +17,6 @@ public final class Hand extends Sprite implements Disposable
 
     //this will determine how the cards are to be displayed
     private CardDisplay display;
-    
-    //object used to rotate graphics
-    private AffineTransform transform;
     
     /**
      * How to display the collection of cards
@@ -38,9 +33,6 @@ public final class Hand extends Sprite implements Disposable
         
         //default to none
         this.display = CardDisplay.None;
-        
-        //object that can rotate card images
-        this.transform = new AffineTransform();
     }
     
     /**
@@ -52,7 +44,7 @@ public final class Hand extends Sprite implements Disposable
         this.display = display;
     }
     
-    private CardDisplay getDisplay()
+    public CardDisplay getDisplay()
     {
         return this.display;
     }
@@ -258,6 +250,38 @@ public final class Hand extends Sprite implements Disposable
     }
     
     /**
+     * Get a card with the matching suit
+     * @param suit The suit we are looking for
+     * @return Card that has the same parameter suit. If the card is not found null will be returned
+     */
+    public Card get(final Card.Suit suit)
+    {
+        for (Card card : getCards())
+        {
+            if (card.equalsSuit(suit))
+                return card;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Get a card with the matching face value
+     * @param value The suit we are looking for
+     * @return Card that has the same parameter value. If the card is not found null will be returned
+     */
+    public Card get(final Card.Value value)
+    {
+        for (Card card : getCards())
+        {
+            if (card.equalsValue(value))
+                return card;
+        }
+        
+        return null;
+    }
+    
+    /**
      * Get card of the specified suit and face value
      * @param suit
      * @param value
@@ -347,42 +371,14 @@ public final class Hand extends Sprite implements Disposable
      */
     public void render(final Graphics graphics, final Image image)
     {
-        //need to use graphics 2d in order to do rotation
-        Graphics2D g2d = (Graphics2D)graphics;
+        //if there is a background image draw it
+        if (super.getImage() != null)
+            super.draw(graphics);
         
-        //reset object used to rotate graphics
-        transform.setToIdentity();;
-            
         for (Card card : getCards())
         {
-            switch(getDisplay())
-            {
-                case Vertical:
-                    
-                    //set rotation accordingly around the anchor coordinates
-                    transform.setToRotation(Math.toRadians(90), card.getCenter().x, card.getCenter().y);
-
-                    //set graphics object to have transformation
-                    g2d.setTransform(transform);
-
-                    //draw card
-                    card.draw(g2d, image);
-                    break;
-                    
-                case Horizontal:
-                case None:
-                default:
-                    
-                    //draw card
-                    card.draw(g2d, image);
-                    break;
-            }
+            //draw the card
+            card.render(graphics, image);
         }
-        
-        //reset rotation etc...
-        transform.setToIdentity();
-        
-        //set to graphics object
-        g2d.setTransform(transform);
     }
 }

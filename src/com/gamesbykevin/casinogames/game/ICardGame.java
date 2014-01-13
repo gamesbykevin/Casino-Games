@@ -9,6 +9,12 @@ import java.util.Random;
 public interface ICardGame extends Disposable
 {
     /**
+     * This method will assign a rank to each card's suit and face value.<br>
+     * This will make it easier to sort or determine victory.
+     */
+    public void assignRank() throws Exception;
+    
+    /**
      * Each card game we will need to create the deck
      */
     public void createDeck() throws Exception;

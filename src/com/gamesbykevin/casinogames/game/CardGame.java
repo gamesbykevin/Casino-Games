@@ -44,8 +44,19 @@ public abstract class CardGame extends Sprite implements Disposable
      */
     public CardGame(final Engine engine) throws Exception
     {
+        //add all deck image possibilities
+        final List<Keys> keys = new ArrayList<>();
+        keys.add(Keys.Deck1);
+        keys.add(Keys.Deck2);
+        keys.add(Keys.Deck3);
+        keys.add(Keys.Deck4);
+        keys.add(Keys.Deck5);
+        keys.add(Keys.Deck6);
+        keys.add(Keys.Deck7);
+        keys.add(Keys.Deck8);
+        
         //choose random key that will determine which deck is used
-        type = Keys.values()[engine.getRandom().nextInt(Keys.values().length)];
+        type = keys.get(engine.getRandom().nextInt(keys.size()));
         
         //store our image with all of the cards
         createDeck(engine.getResources().getGameImage(type));
@@ -224,7 +235,12 @@ public abstract class CardGame extends Sprite implements Disposable
         //draw the deck first
         getDeck().render(graphics);
         
-        //now draw all the players hands
+        //finally draw the destination(s)
+        for (Hand hand : getCardDestinations())
+        {
+            hand.render(graphics, getDeck().getImage());
+        }
+        
         for (Player player : getPlayers())
         {
             if (player != null)
@@ -234,10 +250,7 @@ public abstract class CardGame extends Sprite implements Disposable
             }
         }
         
-        //finally draw the destination(s)
-        for (Hand hand : getCardDestinations())
-        {
-            hand.render(graphics, image);
-        }
+        //draw player  who has a current turn last
+        //getPlayer().render(graphics, getDeck().getImage());
     }
 }

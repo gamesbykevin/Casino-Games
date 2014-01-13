@@ -18,7 +18,12 @@ public class GameImage extends ImageManager
     public enum Keys
     {
         Deck1, Deck2, Deck3, Deck4, Deck5, 
-        Deck6, Deck7, Deck8;
+        Deck6, Deck7, Deck8,
+        
+        Background1, Background2, Background3, 
+        Background4, Background5, Background6, 
+        
+        CardPlaceHolder
     }
     
     public GameImage() throws Exception

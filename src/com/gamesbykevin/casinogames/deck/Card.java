@@ -2,16 +2,41 @@ package com.gamesbykevin.casinogames.deck;
 
 import com.gamesbykevin.framework.base.Sprite;
 
+import com.gamesbykevin.casinogames.deck.Hand.CardDisplay;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
 
 public final class Card extends Sprite
 {
+    //object used to rotate image
+    private AffineTransform transform;
+    
+    private CardDisplay display;
+    
     public enum Suit
     {
         Hearts,
         Diamonds,
         Clubs,
         Spades;
+        
+        //the numeric rank
+        private int rank = 0;
+        
+        public void setRank(final int rank)
+        {
+            this.rank = rank;
+        }
+        
+        public int getRank()
+        {
+            return this.rank;
+        }
     }
     
     public enum Value
@@ -29,6 +54,19 @@ public final class Card extends Sprite
         Jack,
         Queen,
         King;
+        
+        //the numeric rank
+        private int rank = 0;
+        
+        public void setRank(final int rank)
+        {
+            this.rank = rank;
+        }
+        
+        public int getRank()
+        {
+            return this.rank;
+        }
     }
     
     /**
@@ -56,11 +94,31 @@ public final class Card extends Sprite
         this.suit = suit;
         this.value = value;
         
+        //default
+        this.display = CardDisplay.None;
+        
         //the destination will be where we want the card to go
         this.destination = new Point();
         
+        //object that can rotate card image
+        this.transform = new AffineTransform();
+        
         //create spritesheet so we can add animations
         super.createSpriteSheet();
+    }
+    
+    /**
+     * Determine how the cards are to be displayed
+     * @param display Horizontal, Vertical, etc.....
+     */
+    public void setDisplay(final CardDisplay display)
+    {
+        this.display = display;
+    }
+    
+    private CardDisplay getDisplay()
+    {
+        return this.display;
     }
     
     public void setPlayerId(final long playerId)
@@ -148,6 +206,26 @@ public final class Card extends Sprite
     }
     
     /**
+     * Does the parameter suit equal the suit of this card
+     * @param suit The suit
+     * @return True if the suit matches, false otherwise
+     */
+    public boolean equalsSuit(final Suit suit)
+    {
+        return (getSuit() == suit);
+    }
+    
+    /**
+     * Does the parameter value equal the value of this card
+     * @param value The face value
+     * @return True if the value matches, false otherwise
+     */
+    public boolean equalsValue(final Value value)
+    {
+        return (getValue() == value);
+    }
+    
+    /**
      * Does the card match the specified parameters
      * @param suit
      * @param value
@@ -155,7 +233,7 @@ public final class Card extends Sprite
      */
     public boolean equals(final Suit suit, final Value value)
     {
-        return (getSuit() == suit && getValue() == value);
+        return (equalsSuit(suit) && equalsValue(value));
     }
     
     /**
@@ -166,5 +244,48 @@ public final class Card extends Sprite
     public boolean equals(final Card card)
     {
         return equals(card.getSuit(), card.getValue());
+    }
+    
+    /**
+     * Draw the hand
+     * @param graphics
+     * @param image 
+     */
+    public void render(final Graphics graphics, final Image image)
+    {
+        //need to use graphics 2d in order to do rotation
+        Graphics2D g2d = (Graphics2D)graphics;
+        
+        //reset object used to rotate graphics
+        transform.setToIdentity();;
+            
+        switch(getDisplay())
+        {
+            case Vertical:
+
+                //set rotation accordingly around the anchor coordinates
+                transform.setToRotation(Math.toRadians(90), super.getCenter().x, super.getCenter().y);
+
+                //set graphics object to have transformation
+                g2d.setTransform(transform);
+
+                //draw card
+                super.draw(g2d, image);
+                break;
+
+            case Horizontal:
+            case None:
+            default:
+
+                //draw card
+                super.draw(g2d, image);
+                break;
+        }
+        
+        //reset rotation etc...
+        transform.setToIdentity();
+        
+        //set to graphics object
+        g2d.setTransform(transform);
     }
 }
