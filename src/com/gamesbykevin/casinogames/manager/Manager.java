@@ -2,6 +2,7 @@ package com.gamesbykevin.casinogames.manager;
 
 import com.gamesbykevin.casinogames.game.CardGame;
 import com.gamesbykevin.casinogames.game.spades.Spades;
+import com.gamesbykevin.casinogames.game.poker.Poker;
 import com.gamesbykevin.framework.menu.Menu;
 
 import com.gamesbykevin.casinogames.deck.*;
@@ -26,6 +27,11 @@ public final class Manager implements IManager
     //if we are playing spades
     private Spades spades;
     
+    //if we are playing 5,7 card poker
+    private Poker poker;
+    
+    private final Mode.Types type;
+    
     /**
      * Constructor for Manager, this is the point where we load any menu option configurations
      * @param engine
@@ -33,26 +39,50 @@ public final class Manager implements IManager
      */
     public Manager(final Engine engine) throws Exception
     {
-        //create new spades game
-        spades = new Spades(engine);
-        
-        //store the size of the screen
-        //screen = new Rectangle(engine.getMain().getScreen());
-        
         //get the menu object
         final Menu menu = engine.getMenu();
         
-        //get the index
-        final int modeIndex = menu.getOptionSelectionIndex(LayerKey.Options, OptionKey.Mode);
+        //get the index of the game we want to play
+        final int gameIndex = menu.getOptionSelectionIndex(LayerKey.Options, OptionKey.Mode);
+        
+        //the type of game we want to play
+        this.type = Mode.Types.values()[gameIndex];
+        
+        switch(type)
+        {
+            case Spades:
+                
+                //create new spades game
+                spades = new Spades(engine);
+                break;
+                
+            case Poker:
+                
+                //create new poker game
+                poker = new Poker(engine);
+                break;
+        }
+        
+        //store the size of the screen
+        //screen = new Rectangle(engine.getMain().getScreen());
     }
     
     /**
      * Get our card game object
-     * @return 
+     * @return CardGame object, if not found null is returned
      */
     public CardGame getCardGame()
     {
-        return this.spades;
+        switch(type)
+        {
+            case Spades:
+                return this.spades;
+                
+            case Poker:
+                return this.poker;
+        }
+        
+        return null;
     }
     
     /**
@@ -61,7 +91,18 @@ public final class Manager implements IManager
     @Override
     public void dispose()
     {
-        
+        switch(type)
+        {
+            case Spades:
+                spades.dispose();
+                spades = null;
+                break;
+                
+            case Poker:
+                poker.dispose();
+                poker = null;
+                break;
+        }
     }
     
     /**
@@ -73,8 +114,17 @@ public final class Manager implements IManager
     @Override
     public void update(final Engine engine) throws Exception
     {
-        if (spades != null)
-            spades.update(engine);
+        switch(type)
+        {
+            case Spades:
+                spades.update(engine);
+                break;
+                
+            case Poker:
+                poker.update(engine);
+                break;
+                
+        }
     }
     
     /**
@@ -84,7 +134,16 @@ public final class Manager implements IManager
     @Override
     public void render(final Graphics graphics)
     {
-        if (spades != null)
-            spades.render(graphics);
+        switch(type)
+        {
+            case Spades:
+                spades.render(graphics);
+                break;
+                
+            case Poker:
+                poker.render(graphics);
+                break;
+                
+        }
     }
 }

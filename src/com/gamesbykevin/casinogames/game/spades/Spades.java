@@ -327,7 +327,6 @@ public final class Spades extends CardGame implements ICardGame
     {
         //set the size of the cards when displayed
         super.setCardDimensions(CARD_WIDTH);
-        //super.setCardDimensions(super.getDeck().getSourceWidth());
     }
     
     @Override

@@ -34,9 +34,6 @@ public final class Guest extends Player implements IPlayer
     //count the number of victories
     private int win = 0;
     
-    //the name of our player
-    private final String name;
-    
     //image for display stats
     private BufferedImage displayImage;
     
@@ -65,10 +62,7 @@ public final class Guest extends Player implements IPlayer
     
     public Guest(final String name, final Position position)
     {
-        super();
-        
-        //set the player's name
-        this.name = name;
+        super(name);
         
         //set the player's position
         this.position = position;
@@ -97,15 +91,6 @@ public final class Guest extends Player implements IPlayer
     {
         setBet(-1);
         setWin(0);
-    }
-    
-    /**
-     * Get the player's name
-     * @return The name assigned to the player
-     */
-    public String getName()
-    {
-        return this.name;
     }
     
     /**
@@ -177,6 +162,8 @@ public final class Guest extends Player implements IPlayer
         //if the player is human check for mouse input
         if (isHuman())
         {
+            super.update(engine);
+            
             if (hasCardSelected())
             {
                 //if user has let go of mouse
@@ -253,35 +240,6 @@ public final class Guest extends Player implements IPlayer
                     
                     //reset card selection and mouse events
                     resetSelection(engine.getMouse());
-                    
-                    //don't continue right now
-                    return;
-                }
-
-                //user dragged mouse so move card with it
-                if (engine.getMouse().isMouseDragged())
-                {
-                    final int x = (int)(engine.getMouse().getLocation().x - (getHand().get(getCardSelectedIndex()).getWidth() / 2));
-                    final int y = (int)(engine.getMouse().getLocation().y - (getHand().get(getCardSelectedIndex()).getHeight() / 2));
-
-                    getHand().get(getCardSelectedIndex()).setLocation(x, y);
-                }
-            }
-            else
-            {
-                //if we have an active card move it
-                if (getHand().hasActiveCard())
-                {
-                    getHand().moveActiveCard(PLACE_PIXEL_SPEED_X, PLACE_PIXEL_SPEED_Y);
-                }
-                else
-                {
-                    //has the mouse been pressed
-                    if (engine.getMouse().isMousePressed())
-                    {
-                        //set the selected card based on the mouse location
-                        setCardSelected(super.getHand().getIndex(engine.getMouse().getLocation()));
-                    }
                 }
             }
         }
@@ -447,36 +405,6 @@ public final class Guest extends Player implements IPlayer
         
         //set our calculated bet
         setBet(estimatedWins);
-    }
-    
-    /**
-     * Add card to the destination parameter and remove card from our hand
-     * @param destination The destination
-     * @param card The card we want to place
-     */
-    private void placeCard(final Hand destination, final Card card)
-    {
-        //mark the location of the card as the destination
-        card.setDestination(card.getPoint());
-
-        //add card to destination
-        destination.add(card);
-
-        //remove card from the players hand
-        getHand().remove(card);
-    }
-    
-    /**
-     * Reset the mouse events and card selection
-     * @param mouse Object used for mouse input
-     */
-    private void resetSelection(final Mouse mouse)
-    {
-        //we are no longer selecting a card
-        resetCardSelected();
-
-        //reset mouse events
-        mouse.reset();
     }
     
     /**
@@ -810,30 +738,6 @@ public final class Guest extends Player implements IPlayer
         }
         
         return tmp;
-    }
-    
-    private int getCardSelectedIndex()
-    {
-        return this.index;
-    }
-    
-    private void resetCardSelected()
-    {
-        setCardSelected(-1);
-    }
-    
-    private void setCardSelected(final int index)
-    {
-        this.index = index;
-    }
-    
-    /**
-     * Does this player have a card selected
-     * @return 
-     */
-    public boolean hasCardSelected()
-    {
-        return (index >= 0);
     }
     
     /**

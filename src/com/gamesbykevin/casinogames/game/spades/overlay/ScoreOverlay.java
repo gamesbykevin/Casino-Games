@@ -92,7 +92,15 @@ public class ScoreOverlay extends Overlay implements Disposable
             graphics.setColor(Color.BLACK);
             graphics.drawString(info.name,                50, startY);
             graphics.drawString(info.previousScore + "", 200, startY);
-            graphics.drawString(info.bet + "",           320, startY);
+            
+            if (info.bet != 0)
+            {
+                graphics.drawString(info.bet + "", 320, startY);
+            }
+            else
+            {
+                graphics.drawString("NIL", 320, startY);
+            }
             
             //default red color
             graphics.setColor(Color.RED);
@@ -113,9 +121,6 @@ public class ScoreOverlay extends Overlay implements Disposable
                     graphics.setColor(DARK_GREEN);
                 }
             }
-            
-            if (info.win > info.bet || info.bet == 0 && info.win == info.bet)
-                graphics.setColor(DARK_GREEN);
             
             //the wins/bonus/final-score will have the same color
             graphics.drawString(info.win + "",           400, startY);

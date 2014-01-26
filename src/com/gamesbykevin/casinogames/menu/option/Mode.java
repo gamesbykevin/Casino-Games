@@ -9,21 +9,15 @@ import com.gamesbykevin.framework.resources.Audio;
  */
 public final class Mode extends Option
 {
-    private static final String TITLE = "Mode: ";
+    private static final String TITLE = "Game: ";
     
     public enum Types
     {
-        //Play at your convenience
-        Free, 
+        //Play Spades
+        Spades, 
         
-        //Solve the puzzle within the time limit
-        Timed,
-        
-        // or Play against the computer
-        Versus,
-        
-        //you and the computer play against each other and first to solve 5 puzzles without dying wins
-        Race,
+        //Play Poker
+        Poker,
     }
     
     public Mode(final Audio audio)
@@ -35,7 +29,7 @@ public final class Mode extends Option
             super.add(types.toString(), audio);
         }
         
-        //default to free
-        super.setIndex(0);
+        //set default
+        super.setIndex(1);
     }
 }
