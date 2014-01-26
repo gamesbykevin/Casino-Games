@@ -6,7 +6,7 @@ import com.gamesbykevin.casinogames.deck.Card.Value;
 public final class CustomDeck5 extends Deck
 {
     //the original dimensions of the cards on the image
-    private static final int SOURCE_WIDTH = 143;
+    private static final int SOURCE_WIDTH = 142;
     private static final int SOURCE_HEIGHT = 193;
     
     //each card has x pixels between it

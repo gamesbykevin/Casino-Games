@@ -34,6 +34,7 @@ public final class CustomMenu extends Menu implements IElement
         OpponentDifficulty,
         BoardDifficulty,
         Mode,
+        DeckSelection,
     } 
     
     //unique key to indentify each Layer

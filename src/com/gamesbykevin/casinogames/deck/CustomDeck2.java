@@ -7,7 +7,7 @@ public final class CustomDeck2 extends Deck
 {
     //the original dimensions of the cards on the image
     private static final int SOURCE_WIDTH = 167;
-    private static final int SOURCE_HEIGHT = 244;
+    private static final int SOURCE_HEIGHT = 242;
     
     /**
      * Constructor for a new deck.

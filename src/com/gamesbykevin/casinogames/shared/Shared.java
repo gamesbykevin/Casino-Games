@@ -12,7 +12,10 @@ import java.awt.image.BufferedImage;
  */
 public final class Shared 
 {
-    //these dimensions is the size of the game window the user will see
+    /**
+     * These dimensions is the size of the game window the user will see.
+     * NOTE: If these dimensions do not match the original then the mouse input will be off.
+     */
     public static final int INITIAL_WIDTH  = 800;
     public static final int INITIAL_HEIGHT = 500;
     
@@ -27,7 +30,7 @@ public final class Shared
     public static boolean HIDE_MOUSE = false;
     
     //how many updates per second, controls speed of game
-    public static final int DEFAULT_UPS = 120;
+    public static final int DEFAULT_UPS = 60;
     
     //how many frames per second, controls how many images are rendered
     public static final int DEFAULT_FPS = 30;

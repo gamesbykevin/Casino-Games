@@ -7,16 +7,22 @@ import com.gamesbykevin.casinogames.deck.Hand.CardDisplay;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-
 import java.awt.Point;
-import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 
 public final class Card extends Sprite
 {
-    //object used to rotate image
-    private AffineTransform transform;
-    
+    //how we want to display the card
     private CardDisplay display;
+    
+    //image for our card
+    private BufferedImage image;
+    
+    //our graphics object
+    private Graphics2D imageGraphics;
+    
+    //do we write image again
+    private boolean resetImage = true;
     
     public enum Suit
     {
@@ -89,6 +95,9 @@ public final class Card extends Sprite
     //this is so we can determine which player this card came from
     private long playerId = 0;
     
+    //each card will have a unique identifier
+    private final long id = System.nanoTime();
+    
     public Card(final Suit suit, final Value value)
     {
         this.suit = suit;
@@ -100,11 +109,33 @@ public final class Card extends Sprite
         //the destination will be where we want the card to go
         this.destination = new Point();
         
-        //object that can rotate card image
-        this.transform = new AffineTransform();
-        
         //create spritesheet so we can add animations
         super.createSpriteSheet();
+    }
+    
+    @Override
+    public void dispose()
+    {
+        super.dispose();
+        
+        if (image != null)
+            image.flush();
+        
+        image = null;
+        
+        if (imageGraphics != null)
+            imageGraphics.dispose();
+        
+        imageGraphics = null;
+    }
+    
+    /**
+     * Get the unique key for this card. Each card will be different
+     * @return Unique identifier for this card
+     */
+    public long getId()
+    {
+        return this.id;
     }
     
     /**
@@ -114,6 +145,9 @@ public final class Card extends Sprite
     public void setDisplay(final CardDisplay display)
     {
         this.display = display;
+        
+        //reset image
+        resetImage();
     }
     
     private CardDisplay getDisplay()
@@ -166,6 +200,19 @@ public final class Card extends Sprite
     public void setState(final State state)
     {
         super.getSpriteSheet().setCurrent(state);
+        
+        //reset image
+        resetImage();
+    }
+    
+    private void resetImage()
+    {
+        if (this.image != null)
+        {
+            this.image.flush();
+        }
+        
+        this.resetImage = true;
     }
     
     /**
@@ -253,39 +300,50 @@ public final class Card extends Sprite
      */
     public void render(final Graphics graphics, final Image image)
     {
-        //need to use graphics 2d in order to do rotation
-        Graphics2D g2d = (Graphics2D)graphics;
-        
-        //reset object used to rotate graphics
-        transform.setToIdentity();
-            
-        switch(getDisplay())
+        //our image object
+        if (this.image == null)
         {
-            case Vertical:
+            this.image = new BufferedImage((int)getWidth(), (int)getHeight(), BufferedImage.TYPE_INT_ARGB);
+        }
+            
+        if (this.resetImage)
+        {
+            this.resetImage = false;
+            
+            //create graphics object to write to image
+            imageGraphics = this.image.createGraphics();
+            
+            //store location
+            final double x = getX();
+            final double y = getY();
+            
+            //reset to origin
+            super.setLocation(0, 0);
+            
+            switch(getDisplay())
+            {
+                case Vertical:
 
-                //set rotation accordingly around the anchor coordinates
-                transform.setToRotation(Math.toRadians(90), super.getCenter().x, super.getCenter().y);
+                    //set rotation accordingly around the anchor coordinates
+                    imageGraphics.rotate(Math.toRadians(90), super.getCenter().x, super.getCenter().y);
+                    
+                    //draw card
+                    super.draw(imageGraphics, image);
+                    break;
 
-                //set graphics object to have transformation
-                g2d.setTransform(transform);
+                case Horizontal:
+                case None:
+                default:
 
-                //draw card
-                super.draw(g2d, image);
-                break;
-
-            case Horizontal:
-            case None:
-            default:
-
-                //draw card
-                super.draw(g2d, image);
-                break;
+                    //draw card
+                    super.draw(imageGraphics, image);
+                    break;
+            }
+            
+            //set location back to original
+            super.setLocation(x, y);
         }
         
-        //reset rotation etc...
-        transform.setToIdentity();
-        
-        //set to graphics object
-        g2d.setTransform(transform);
+        graphics.drawImage(this.image, (int)getX(), (int)getY(), null);
     }
 }

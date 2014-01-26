@@ -5,6 +5,8 @@ import com.gamesbykevin.framework.resources.Disposable;
 
 import com.gamesbykevin.casinogames.deck.*;
 import com.gamesbykevin.casinogames.engine.Engine;
+import com.gamesbykevin.casinogames.menu.CustomMenu.LayerKey;
+import com.gamesbykevin.casinogames.menu.CustomMenu.OptionKey;
 import com.gamesbykevin.casinogames.player.Player;
 import com.gamesbykevin.casinogames.resources.GameImage.Keys;
 
@@ -28,7 +30,7 @@ public abstract class CardGame extends Sprite implements Disposable
     private Object step;
     
     //the player that has the current turn
-    private int turnIndex = 0;
+    //private int turnIndex = 0;
     
     //our object containing all players
     private List<Object> players;
@@ -44,21 +46,50 @@ public abstract class CardGame extends Sprite implements Disposable
      */
     public CardGame(final Engine engine) throws Exception
     {
-        //add all deck image possibilities
-        final List<Keys> keys = new ArrayList<>();
-        keys.add(Keys.Deck1);
-        keys.add(Keys.Deck2);
-        keys.add(Keys.Deck3);
-        keys.add(Keys.Deck4);
-        keys.add(Keys.Deck5);
-        keys.add(Keys.Deck6);
-        keys.add(Keys.Deck7);
-        keys.add(Keys.Deck8);
+        final int deckSelection = engine.getMenu().getOptionSelectionIndex(LayerKey.Options, OptionKey.DeckSelection);
         
-        //choose random key that will determine which deck is used
-        type = keys.get(engine.getRandom().nextInt(keys.size()));
+        switch(deckSelection)
+        {
+            case 0:
+                type = Keys.Deck1;
+                break;
+                
+            case 1:
+                type = Keys.Deck2;
+                break;
+                
+            case 2:
+                type = Keys.Deck3;
+                break;
+                
+            case 3:
+                type = Keys.Deck4;
+                break;
+                
+            case 4:
+                type = Keys.Deck5;
+                break;
+                
+            case 5:
+                type = Keys.Deck6;
+                break;
+
+            default:
+                
+                //add all deck image possibilities
+                final List<Keys> keys = new ArrayList<>();
+                keys.add(Keys.Deck1);
+                keys.add(Keys.Deck2);
+                keys.add(Keys.Deck3);
+                keys.add(Keys.Deck4);
+                keys.add(Keys.Deck5);
+                keys.add(Keys.Deck6);
+                
+                //choose random key that will determine which deck is used
+                type = keys.get(engine.getRandom().nextInt(keys.size()));
+                break;
+        }
         
-        //store our image with all of the cards
         createDeck(engine.getResources().getGameImage(type));
         
         //create our player list
@@ -84,17 +115,23 @@ public abstract class CardGame extends Sprite implements Disposable
     }
     
     /**
-     * Get the player that has been marked by the current turn index
-     * @return Player marked as current
+     * Get the first player in the list that has a turn
+     * @return Player that has turn, if none were found null is returned.
      */
     public Object getPlayer()
     {
-        return getPlayer(getTurnIndex());
+        for (int index = 0; index < getPlayers().size(); index++)
+        {
+            if (((Player)getPlayer(index)).hasTurn())
+                return getPlayers().get(index);
+        }
+        
+        return null;
     }
     
     public Object getPlayer(final int index)
     {
-        return players.get(index);
+        return (Player)players.get(index);
     }
     
     public List<Object> getPlayers()
@@ -103,48 +140,69 @@ public abstract class CardGame extends Sprite implements Disposable
     }
     
     /**
-     * Get the index of the player who is currently being dealt
-     * @return location in collection of List player(s)
-     */
-    private int getTurnIndex()
-    {
-        return this.turnIndex;
-    }
-    
-    public void setTurnIndex(final int turnIndex)
-    {
-        this.turnIndex = turnIndex;
-    }
-    
-    /**
-     * Sets the player with the matching playerId to have the current turn
+     * Sets the player with the matching playerId to have a turn
      * @param playerId Unique id of player
      */
-    public void setTurnIndex(final long playerId)
+    public void setTurn(final long playerId)
     {
         for (int index = 0; index < players.size(); index++)
         {
-            if (((Player)getPlayer(index)).getId() == playerId)
+            Player player = (Player)getPlayer(index);
+            
+            if (player.getId() == playerId && !player.hasTurn())
             {
-                setTurnIndex(index);
+                player.switchTurn();
                 break;
             }
         }
     }
     
     /**
-     * Determine who is the next player to select going from one index to the next.
-     * Once we reach the end we restart back at 0.
+     * Set all turns for each player to false
      */
-    public void changeTurnIndex()
+    public void resetTurns()
     {
-        if (turnIndex < players.size() - 1)
+        for (int index = 0; index < players.size(); index++)
         {
-            setTurnIndex(getTurnIndex() + 1);
+            Player player = (Player)getPlayer(index);
+            
+            //if this is the player that has a turn
+            if (player.hasTurn())
+            {
+                //switch turn off
+                player.switchTurn();
+            }
         }
-        else
+    }
+    
+    /**
+     * Locate the first player to have a turn, then set their turn to false.<br> 
+     * Then give the next player in the list a turn.<br>
+     * If the player is the last one then the turn will be the first player in the list.
+     */
+    public void changeTurn()
+    {
+        for (int index = 0; index < players.size(); index++)
         {
-            setTurnIndex(0);
+            Player player = (Player)getPlayer(index);
+            
+            //if this is the player that has a turn
+            if (player.hasTurn())
+            {
+                //switch turn
+                player.switchTurn();
+                
+                if (index == players.size() - 1)
+                {
+                    ((Player)getPlayer(0)).switchTurn();
+                }
+                else
+                {
+                    ((Player)getPlayer(index + 1)).switchTurn();
+                }
+                
+                break;
+            }
         }
     }
     
@@ -174,14 +232,6 @@ public abstract class CardGame extends Sprite implements Disposable
                 
             case Deck6:
                 this.deck = new CustomDeck6();
-                break;
-                
-            case Deck7:
-                this.deck = new CustomDeck7();
-                break;
-                
-            case Deck8:
-                this.deck = new CustomDeck8();
                 break;
                 
             default:
@@ -219,16 +269,8 @@ public abstract class CardGame extends Sprite implements Disposable
         deck.dispose();
         deck = null;
         
-        for (Object player : getPlayers())
-        {
-            if (player != null)
-                ((Player)player).dispose();
-            
-            player = null;
-        }
-        
-        this.players.clear();
-        this.players = null;
+        players.clear();
+        players = null;
         
         for (Hand hand : getCardDestinations())
         {
@@ -238,8 +280,8 @@ public abstract class CardGame extends Sprite implements Disposable
             hand = null;
         }
         
-        this.cardDestinations.clear();
-        this.cardDestinations = null;
+        cardDestinations.clear();
+        cardDestinations = null;
     }
     
     public void render(final Graphics graphics)

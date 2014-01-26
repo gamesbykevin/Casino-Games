@@ -41,12 +41,7 @@ public interface ICardGame extends Disposable
     /**
      * Determine how the cards will be dealt out to the player(s)
      */
-    public void deal(final Random random);
-    
-    /**
-     * Here we will determine whether the round/game has been completed
-     */
-    public void checkFinish();
+    public void deal(final Engine engine);
     
     /**
      * Contains logic to draw the game

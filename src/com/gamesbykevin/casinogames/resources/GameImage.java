@@ -15,15 +15,28 @@ public class GameImage extends ImageManager
     //description for progress bar
     private static final String DESCRIPTION = "Loading Game Image Resources";
     
+    /**
+     * These keys need to be in a specific order to match the order in the source DIRECTORY
+     */
     public enum Keys
     {
-        Deck1, Deck2, Deck3, Deck4, Deck5, 
-        Deck6, Deck7, Deck8,
+        Deck1, Deck2, Deck3, Deck4, Deck5, Deck6, 
         
         Background1, Background2, Background3, 
         Background4, Background5, Background6, 
         
-        CardPlaceHolder
+        CardPlaceHolder,
+        
+        HorizontalDisplay,
+        VerticalDisplay,
+        
+        SpadesBetOverlay,
+        
+        //to be used to show a summary of how much each player scored
+        SpadesScoreOverlay,
+        
+        //GameOverOverlay
+        SpadesGameOverOverlay
     }
     
     public GameImage() throws Exception

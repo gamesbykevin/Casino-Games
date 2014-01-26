@@ -44,6 +44,8 @@ public final class Options extends Layer implements LayerRules
         super.add(OptionKey.Mode,                   new Mode(audio));
         super.add(OptionKey.OpponentDifficulty,     new OpponentDifficulty(audio));
         
+        super.add(OptionKey.DeckSelection,          new DeckSelection(audio));
+        
         //don't add sound option for now
         //super.add(OptionKey.Sound,                  new Sound(audio));
         

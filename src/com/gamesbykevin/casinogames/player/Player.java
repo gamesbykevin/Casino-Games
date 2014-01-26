@@ -18,6 +18,9 @@ public abstract class Player extends Sprite implements Disposable
     //is this player controlled by a human
     private boolean human = false;
     
+    //does this player have a turn, default to false
+    private boolean turn = false;
+    
     //unique number to identify each player
     private final long id;
     
@@ -36,6 +39,23 @@ public abstract class Player extends Sprite implements Disposable
     public long getId()
     {
         return id;
+    }
+    
+    /**
+     * Switch the turn, if turn is true then it will be false and vice versa
+     */
+    public void switchTurn()
+    {
+        this.turn = !this.turn;
+    }
+    
+    /**
+     * Does this player have a turn
+     * @return True if they have a turn, false otherwise
+     */
+    public boolean hasTurn()
+    {
+        return this.turn;
     }
     
     /**
@@ -86,6 +106,7 @@ public abstract class Player extends Sprite implements Disposable
         //set the display for the card
         card.setDisplay(getHand().getDisplay());
         
+        //add the card to the hand
         getHand().add(card);
     }
     

@@ -18,6 +18,7 @@ public class GameAudio extends AudioManager
     
     public enum Keys
     {
+        PlaceCard, InvalidMove, WinGame, LoseGame, ButtonPress, ShowScoreSound
     }
     
     public GameAudio() throws Exception
