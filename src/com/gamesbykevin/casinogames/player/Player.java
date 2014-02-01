@@ -9,13 +9,14 @@ import com.gamesbykevin.casinogames.engine.Engine;
 import com.gamesbykevin.framework.input.Mouse;
 
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
 
 public abstract class Player extends Sprite implements Disposable
 {
-    //the speed at which the cards move while placing
-    protected static final int PLACE_PIXEL_SPEED_X = 3;
-    protected static final int PLACE_PIXEL_SPEED_Y = 3;
+    //the speed for the movement
+    private int pixelMoveX = 1, pixelMoveY = 1;
     
     //player's collection of cards
     private Hand hand;
@@ -35,6 +36,18 @@ public abstract class Player extends Sprite implements Disposable
     //the index of our selected card
     private int index = -1;
     
+    //do we create a new status image
+    private boolean resetStatusImage = true;
+    
+    //our status image
+    private BufferedImage statusImage;
+    
+    //our graphics object
+    private Graphics2D statusGraphics;
+    
+    //the player's score
+    private int score = 0;
+    
     protected Player(final String name)
     {
         //set the name of this player
@@ -45,6 +58,58 @@ public abstract class Player extends Sprite implements Disposable
         
         //set the unique id
         this.id  = System.nanoTime();
+    }
+    
+    public int getScore()
+    {
+        return this.score;
+    }
+    
+    public void setScore(final int score)
+    {
+        this.score = score;
+    }
+    
+    /**
+     * Remove the display image
+     */
+    public void resetStatusImage()
+    {
+        if (statusImage != null)
+        {
+            //release image resources
+            statusImage.flush();
+        }
+        
+        //write to image again
+        this.resetStatusImage = true;
+    }
+    
+    protected void createStatusImage(final int width, final int height)
+    {
+        this.statusImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+    
+    protected BufferedImage getStatusImage()
+    {
+        return this.statusImage;
+    }
+    
+    protected Graphics2D getStatusImageGraphics()
+    {
+        statusGraphics = this.getStatusImage().createGraphics();
+        
+        return this.statusGraphics;
+    }
+    
+    protected boolean hasResetStatusImageFlag()
+    {
+        return this.resetStatusImage;
+    }
+    
+    protected void switchResetStatusImageFlag()
+    {
+        this.resetStatusImage = !this.resetStatusImage;
     }
     
     /**
@@ -107,6 +172,22 @@ public abstract class Player extends Sprite implements Disposable
         
         hand.dispose();
         hand = null;
+        
+        if (this.statusImage != null)
+            this.statusImage.flush();
+        
+        this.statusImage = null;
+        
+        if (this.statusGraphics != null)
+            this.statusGraphics.dispose();
+        
+        this.statusGraphics = null;
+    }
+    
+    public void setPixelSpeed(final int x, final int y)
+    {
+        this.pixelMoveX = x;
+        this.pixelMoveY = y;
     }
     
     /**
@@ -156,7 +237,7 @@ public abstract class Player extends Sprite implements Disposable
                 //if we have an active card move it
                 if (getHand().hasActiveCard())
                 {
-                    getHand().moveActiveCard(PLACE_PIXEL_SPEED_X, PLACE_PIXEL_SPEED_Y);
+                    getHand().moveActiveCard(pixelMoveX, pixelMoveY);
                 }
                 else
                 {
@@ -168,16 +249,6 @@ public abstract class Player extends Sprite implements Disposable
                     }
                 }
             }
-        }
-        else
-        {
-            /*
-            //if we have an active card move it
-            if (getHand().hasActiveCard())
-            {
-                getHand().moveActiveCard(PLACE_PIXEL_SPEED_X, PLACE_PIXEL_SPEED_Y);
-            }
-            */ 
         }
     }
     
@@ -221,6 +292,10 @@ public abstract class Player extends Sprite implements Disposable
         setCardSelected(-1);
     }
     
+    /**
+     * Set the index of the card we have selected
+     * @param index Index where card is located
+     */
     protected void setCardSelected(final int index)
     {
         this.index = index;
@@ -241,4 +316,9 @@ public abstract class Player extends Sprite implements Disposable
      * @param image 
      */
     public abstract void render(final Graphics graphics, final Image image);
+    
+    protected void drawInfo(final Graphics2D g2d, final String info, final double x, final double y)
+    {
+        g2d.drawString(info, (int)x, (int)y);
+    }
 }

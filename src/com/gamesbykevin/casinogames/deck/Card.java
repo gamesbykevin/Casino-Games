@@ -84,10 +84,10 @@ public final class Card extends Sprite
     }
     
     //what suit does this card come from
-    private final Suit suit;
+    private Suit suit;
     
     //what is the face value of the card
-    private final Value value;
+    private Value value;
     
     //the x,y coordinate where the card should be
     private final Point destination;
@@ -100,8 +100,8 @@ public final class Card extends Sprite
     
     public Card(final Suit suit, final Value value)
     {
-        this.suit = suit;
-        this.value = value;
+        setSuit(suit);
+        setValue(value);
         
         //default
         this.display = CardDisplay.None;
@@ -111,6 +111,16 @@ public final class Card extends Sprite
         
         //create spritesheet so we can add animations
         super.createSpriteSheet();
+    }
+    
+    public void setSuit(final Suit suit)
+    {
+        this.suit = suit;
+    }
+    
+    public void setValue(final Value value)
+    {
+        this.value = value;
     }
     
     @Override
@@ -183,6 +193,16 @@ public final class Card extends Sprite
      * @param x
      * @param y 
      */
+    public void setDestination(final double x, final double y)
+    {
+        this.destination.setLocation((int)x, (int)y);
+    }
+    
+    /**
+     * Set the destination where the card should go.
+     * @param x
+     * @param y 
+     */
     public void setDestination(final int x, final int y)
     {
         this.destination.setLocation(x, y);
@@ -208,9 +228,7 @@ public final class Card extends Sprite
     private void resetImage()
     {
         if (this.image != null)
-        {
             this.image.flush();
-        }
         
         this.resetImage = true;
     }
@@ -298,13 +316,11 @@ public final class Card extends Sprite
      * @param graphics
      * @param image 
      */
-    public void render(final Graphics graphics, final Image image)
+    public void render(final Graphics graphics, final Image spriteImage)
     {
         //our image object
         if (this.image == null)
-        {
             this.image = new BufferedImage((int)getWidth(), (int)getHeight(), BufferedImage.TYPE_INT_ARGB);
-        }
             
         if (this.resetImage)
         {
@@ -328,7 +344,7 @@ public final class Card extends Sprite
                     imageGraphics.rotate(Math.toRadians(90), super.getCenter().x, super.getCenter().y);
                     
                     //draw card
-                    super.draw(imageGraphics, image);
+                    super.draw(imageGraphics, spriteImage);
                     break;
 
                 case Horizontal:
@@ -336,7 +352,7 @@ public final class Card extends Sprite
                 default:
 
                     //draw card
-                    super.draw(imageGraphics, image);
+                    super.draw(imageGraphics, spriteImage);
                     break;
             }
             

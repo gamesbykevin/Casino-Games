@@ -36,7 +36,12 @@ public class GameImage extends ImageManager
         SpadesScoreOverlay,
         
         //GameOverOverlay
-        SpadesGameOverOverlay
+        SpadesGameOverOverlay,
+        
+        //to be used to show a summary of how much each player scored
+        CrazyEightsScoreOverlay,
+        
+        HorizontalDisplaySmaller,
     }
     
     public GameImage() throws Exception

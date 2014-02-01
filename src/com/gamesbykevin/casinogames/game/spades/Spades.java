@@ -19,6 +19,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Here is the engine for Spades
+ * @author GOD
+ */
 public final class Spades extends CardGame implements ICardGame
 {
     //we only need the width because we calculate the height by the ratio
@@ -44,6 +48,11 @@ public final class Spades extends CardGame implements ICardGame
     private ScoreOverlay scoreOverlay;
     
     private GameOverOverlay gameOverOverlay;
+    
+    protected enum Destinations
+    {
+        PlaceCard
+    }
     
     //steps to follow in this game
     private enum Steps
@@ -128,7 +137,7 @@ public final class Spades extends CardGame implements ICardGame
         super.setDimensions(super.getImage().getWidth(null), super.getImage().getHeight(null));
         
         //add place for players to put their cards when playing
-        super.getCardDestinations().add(destination);
+        super.addCardDestination(Destinations.PlaceCard, destination);
         
         //add our 4 players
         super.getPlayers().add(new Guest("Human",    Position.South));
@@ -175,8 +184,8 @@ public final class Spades extends CardGame implements ICardGame
         //reset all turns
         super.resetTurns();
         
-        //for now the first player will have the first turn
-        super.setTurn(player1.getId());
+        //random player will start first
+        super.setTurn(getPlayer(engine.getRandom().nextInt(super.getPlayers().size())));
     }
     
     /**
@@ -369,8 +378,11 @@ public final class Spades extends CardGame implements ICardGame
                 if (player.isHuman())
                     card.setState(Card.State.Display);
 
+                //determine the position in the hand where the card will go
+                final int size = player.getHand().getSize();
+                
                 //set the card to be placed where the player is
-                card.setDestination(player.getHand().getDestination(CARD_WIDTH));
+                card.setDestination(player.getHand().getDestination(size, CARD_WIDTH));
                 
                 //add card to player hand
                 player.addHand(card);
@@ -394,7 +406,7 @@ public final class Spades extends CardGame implements ICardGame
         engine.getResources().stopGameAudio(GameAudio.Keys.PlaceCard);
         
         //for now the first player will have the first turn
-        super.setTurn(0);
+        //super.setTurn(0);
         
         //dealing is finished so we need to set the next step
         super.setStep(Steps.PlaceBet);
@@ -469,7 +481,7 @@ public final class Spades extends CardGame implements ICardGame
                     scoreOverlay.addPlayerStat(player.getName(), player.getScore(), player.getBet(), player.getWin(), scoreAdd, player.getScore() + scoreAdd);
 
                     //add our result
-                    player.addScore(scoreAdd);
+                    player.setScore(player.getScore() + scoreAdd);
                 }
             }
             else
@@ -627,7 +639,7 @@ public final class Spades extends CardGame implements ICardGame
     private void checkWin()
     {
         //get the destination with all of the players cards
-        final Hand destination = super.getCardDestinations().get(0);
+        final Hand destination = getCardDestination(Destinations.PlaceCard);
         
         //determine who is the winner
         Card winner = getWinner(destination.getCards());
@@ -777,7 +789,7 @@ public final class Spades extends CardGame implements ICardGame
     private void animateWin()
     {
         //get the destination with all of the players cards
-        final Hand destination = super.getCardDestinations().get(0);
+        final Hand destination = getCardDestination(Destinations.PlaceCard);
         
         //if we have any cards not at the destination yet
         if (destination.hasActiveCard())
@@ -818,7 +830,7 @@ public final class Spades extends CardGame implements ICardGame
                 ((Guest)getPlayer()).update(engine);
                 
                 //if each player has placed a card
-                if (getCardDestinations().get(0).getSize() == getPlayers().size())
+                if (getCardDestination(Destinations.PlaceCard).getSize() == getPlayers().size())
                     super.setStep(Steps.CheckWin);
                 
                 break;

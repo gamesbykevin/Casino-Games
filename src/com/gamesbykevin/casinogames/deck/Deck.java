@@ -122,8 +122,11 @@ public abstract class Deck extends Sprite implements Disposable
         //add hidden animation
         card.getSpriteSheet().add(new Animation(getMapping(null, null).getCoordinate(), 0), State.Hidden);
         
+        //the animations will be 1 frame so no need to loop
+        card.getSpriteSheet().setPause(true);
+        
         //default the cards to be hidden
-        card.getSpriteSheet().setCurrent(State.Hidden);
+        card.setState(State.Hidden);
     
         //set the location/destination of the cards
         card.setLocation(getX(), getY());

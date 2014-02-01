@@ -215,25 +215,15 @@ public final class Hand extends Sprite implements Disposable
     }
     
     /**
-     * Remove this card from the deck, if this card is in the deck more than once only the first card found is removed
-     * @param card 
+     * Remove this card from the deck
+     * @param card With unique id so only 1 card will be removed
      */
     public void remove(final Card card)
-    {
-        remove(card.getSuit(), card.getValue());
-    }
-    
-    /**
-     * Remove this card from the deck, if this card is in the deck more than once only the first card found is removed
-     * @param suit
-     * @param value 
-     */
-    public void remove(final Card.Suit suit, final Card.Value value)
     {
         //search deck for the card we want to remove
         for (int index = 0; index < getSize(); index++)
         {
-            if (getCards().get(index).equals(suit, value))
+            if (getCards().get(index).getId() == card.getId())
             {
                 //remove card from index
                 getCards().remove(index);
@@ -259,6 +249,24 @@ public final class Hand extends Sprite implements Disposable
         }
         
         return -1;
+    }
+    
+    /**
+     * Get the first card
+     * @return Card, if not found null should be returned
+     */
+    public Card getFirst()
+    {
+        return get(0);
+    }
+    
+    /**
+     * Get the last card
+     * @return Card, if not found null should be returned
+     */
+    public Card getLast()
+    {
+        return get(getSize() - 1);
     }
     
     public Card get(final int index)
@@ -365,15 +373,43 @@ public final class Hand extends Sprite implements Disposable
     }
     
     /**
+     * This method will reset x,y coordinates so all cards will be aligned.
+     * The width of the cards
+     */
+    public void resetDestinations(final int width)
+    {
+        for (int index=0; index < getSize(); index++)
+        {
+            //our current card
+            final Card card = get(index);
+            
+            //the number of pixels to offset new destination
+            final int offset = (int)(index * (width * .3));
+
+            //the final location
+            final Point location = getDestination(offset);
+            
+            //set the location and destination to the same place
+            card.setLocation(location);
+            card.setDestination(card.getPoint());
+        }
+    }
+    
+    /**
      * Take into consideration all of the existing cards and return the next x,y location
      * @param width Width of a single card
      * @return Location where next card is to be placed.
      */
-    public Point getDestination(final int width)
+    public Point getDestination(final int position, final int width)
     {
         //the number of pixels to offset new destination
-        final int offset = (int)(getSize() * (width * .3));
+        final int offset = (int)(position * (width * .3));
         
+        return getDestination(offset);
+    }
+    
+    private Point getDestination(final int offset)
+    {
         switch(getDisplay())
         {
             case Vertical:

@@ -1,9 +1,10 @@
 package com.gamesbykevin.casinogames.manager;
 
-import com.gamesbykevin.casinogames.game.CardGame;
-import com.gamesbykevin.casinogames.game.spades.Spades;
-import com.gamesbykevin.casinogames.game.poker.Poker;
 import com.gamesbykevin.framework.menu.Menu;
+
+import com.gamesbykevin.casinogames.game.CardGame;
+import com.gamesbykevin.casinogames.game.crazyeights.CrazyEights;
+import com.gamesbykevin.casinogames.game.spades.Spades;
 
 import com.gamesbykevin.casinogames.deck.*;
 import com.gamesbykevin.casinogames.engine.Engine;
@@ -27,8 +28,8 @@ public final class Manager implements IManager
     //if we are playing spades
     private Spades spades;
     
-    //if we are playing 5,7 card poker
-    private Poker poker;
+    //if we are playing crazy eights
+    private CrazyEights crazy8s;
     
     private final Mode.Types type;
     
@@ -56,10 +57,10 @@ public final class Manager implements IManager
                 spades = new Spades(engine);
                 break;
                 
-            case Poker:
+            case Crazy8s:
                 
                 //create new poker game
-                poker = new Poker(engine);
+                crazy8s = new CrazyEights(engine);
                 break;
         }
         
@@ -78,8 +79,8 @@ public final class Manager implements IManager
             case Spades:
                 return this.spades;
                 
-            case Poker:
-                return this.poker;
+            case Crazy8s:
+                return this.crazy8s;
         }
         
         return null;
@@ -98,9 +99,9 @@ public final class Manager implements IManager
                 spades = null;
                 break;
                 
-            case Poker:
-                poker.dispose();
-                poker = null;
+            case Crazy8s:
+                crazy8s.dispose();
+                crazy8s = null;
                 break;
         }
     }
@@ -120,10 +121,9 @@ public final class Manager implements IManager
                 spades.update(engine);
                 break;
                 
-            case Poker:
-                poker.update(engine);
+            case Crazy8s:
+                crazy8s.update(engine);
                 break;
-                
         }
     }
     
@@ -140,10 +140,9 @@ public final class Manager implements IManager
                 spades.render(graphics);
                 break;
                 
-            case Poker:
-                poker.render(graphics);
+            case Crazy8s:
+                crazy8s.render(graphics);
                 break;
-                
         }
     }
 }

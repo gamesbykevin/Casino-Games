@@ -1,7 +1,5 @@
 package com.gamesbykevin.casinogames.game.spades;
 
-import com.gamesbykevin.framework.input.Mouse;
-
 import com.gamesbykevin.casinogames.engine.Engine;
 import com.gamesbykevin.casinogames.deck.Card;
 import com.gamesbykevin.casinogames.deck.Card.*;
@@ -14,7 +12,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
-import java.awt.image.BufferedImage;
 
 public final class Guest extends Player implements IPlayer
 {
@@ -22,26 +19,11 @@ public final class Guest extends Player implements IPlayer
     protected static final int PLACE_PIXEL_SPEED_X = 3;
     protected static final int PLACE_PIXEL_SPEED_Y = 3;
     
-    //the index of our selected card
-    private int index = -1;
-    
     //bet how many wins you will have
     private int bet = -1;
     
-    //keep track of score
-    private int score = 0;
-    
     //count the number of victories
     private int win = 0;
-    
-    //image for display stats
-    private BufferedImage displayImage;
-    
-    //our graphics object
-    private Graphics2D displayImageGraphics;
-    
-    //do we write to image
-    private boolean resetImage = true;
     
     private enum Logic
     {
@@ -64,6 +46,8 @@ public final class Guest extends Player implements IPlayer
     {
         super(name);
         
+        super.setPixelSpeed(PLACE_PIXEL_SPEED_X, PLACE_PIXEL_SPEED_Y);
+        
         //set the player's position
         this.position = position;
     }
@@ -72,16 +56,6 @@ public final class Guest extends Player implements IPlayer
     public void dispose()
     {
         super.dispose();
-        
-        if (displayImage != null)
-            displayImage.flush();
-        
-        displayImage = null;
-        
-        if (displayImageGraphics != null)
-            displayImageGraphics.dispose();
-        
-        displayImageGraphics = null;
     }
     
     /**
@@ -93,26 +67,12 @@ public final class Guest extends Player implements IPlayer
         setWin(0);
     }
     
-    /**
-     * Add parameter to total score
-     * @param score 
-     */
-    public void addScore(final int score)
-    {
-        this.score += score;
-    }
-    
-    public int getScore()
-    {
-        return this.score;
-    }
-    
     public void setBet(final int bet)
     {
         this.bet = bet;
         
         //we need a new display image
-        resetImage();
+        resetStatusImage();
     }
     
     public int getBet()
@@ -139,7 +99,7 @@ public final class Guest extends Player implements IPlayer
         this.win++;
         
         //we need a new display image
-        resetImage();
+        resetStatusImage();
     }
     
     private void setWin(final int win)
@@ -177,7 +137,7 @@ public final class Guest extends Player implements IPlayer
                         return;
                     
                     //get the place where the cards can be placed
-                    final Hand destination = engine.getManager().getCardGame().getCardDestinations().get(0);
+                    final Hand destination = engine.getManager().getCardGame().getCardDestination(Spades.Destinations.PlaceCard);
 
                     //if the active card is within the place card area
                     if (destination.getRectangle().contains(card.getCenter()))
@@ -249,7 +209,7 @@ public final class Guest extends Player implements IPlayer
             if (!getHand().hasActiveCard())
             {
                 //get the card destination where the cards are placed
-                final Hand destination = engine.getManager().getCardGame().getCardDestinations().get(0);
+                final Hand destination = engine.getManager().getCardGame().getCardDestination(Spades.Destinations.PlaceCard);
                 
                 Card selection = null;
                 
@@ -369,7 +329,7 @@ public final class Guest extends Player implements IPlayer
                     engine.getResources().playGameAudio(GameAudio.Keys.PlaceCard);
                     
                     //place card accordingly
-                    placeCard(engine.getManager().getCardGame().getCardDestinations().get(0), card);
+                    placeCard(engine.getManager().getCardGame().getCardDestination(Spades.Destinations.PlaceCard), card);
 
                     //no longer turn so change turn
                     engine.getManager().getCardGame().changeTurn();
@@ -740,21 +700,6 @@ public final class Guest extends Player implements IPlayer
         return tmp;
     }
     
-    /**
-     * Remove the display image
-     */
-    private void resetImage()
-    {
-        if (this.displayImage != null)
-        {
-            //release image resources
-            this.displayImage.flush();
-        }
-        
-        //write to image again
-        this.resetImage = true;
-    }
-    
     @Override
     public void render(final Graphics graphics, final Image image)
     {
@@ -768,24 +713,22 @@ public final class Guest extends Player implements IPlayer
     private void drawDisplay(final Graphics graphics)
     {
         //create new display image
-        if (displayImage == null)
-        {
-            this.displayImage = new BufferedImage(getImage().getWidth(null), getImage().getHeight(null), BufferedImage.TYPE_INT_ARGB);
-        }
+        if (getStatusImage() == null)
+            createStatusImage(getImage().getWidth(null), getImage().getHeight(null));
         
         //do we write to image again
-        if (resetImage)
+        if (hasResetStatusImageFlag())
         {
-            resetImage = false;
+            switchResetStatusImageFlag();
             
-            //create our graphics object to write to the image
-            displayImageGraphics = this.displayImage.createGraphics();
-
+            //get our graphics object to write to
+            Graphics2D tmp = getStatusImageGraphics();
+            
             //draw display background
-            displayImageGraphics.drawImage(getImage(), 0, 0, null);
+            tmp.drawImage(getImage(), 0, 0, null);
             
             //set font color
-            displayImageGraphics.setColor(Color.BLACK);
+            tmp.setColor(Color.BLACK);
 
             //also need to draw win count, and bet amount along with player name
             switch(getHand().getDisplay())
@@ -793,25 +736,25 @@ public final class Guest extends Player implements IPlayer
                 case Vertical:
 
                     //set graphics object to have transformation
-                    displayImageGraphics.rotate(Math.toRadians(90), 0, 0);
+                    tmp.rotate(Math.toRadians(90), 0, 0);
 
                     //draw info
-                    drawInfo(displayImageGraphics, "Books = ", + 85,  - 35);
-                    drawInfo(displayImageGraphics, "Bet = ", + 185, - 35);
-                    drawInfo(displayImageGraphics, getName(), + 85, - 15);
+                    drawInfo(tmp, "Books = ", + 85,  - 35);
+                    drawInfo(tmp, "Bet = ", + 185, - 35);
+                    drawInfo(tmp, getName(), + 85, - 15);
 
                     if (hasBet())
-                        drawInfo(displayImageGraphics, "" + getBet(), + 245, - 35);
+                        drawInfo(tmp, "" + getBet(), + 245, - 35);
 
                     if (hasTurn() && hasBet())
-                        drawInfo(displayImageGraphics, "(Playing)", + 185, - 15);
+                        drawInfo(tmp, "(Playing)", + 185, - 15);
 
                     if (getWin() < getBet())
-                        displayImageGraphics.setColor(Color.RED);
+                        tmp.setColor(Color.RED);
                     else
-                        displayImageGraphics.setColor(Color.GREEN);
+                        tmp.setColor(Color.GREEN);
 
-                    drawInfo(displayImageGraphics, "" + getWin(), + 145,  - 35);
+                    drawInfo(tmp, "" + getWin(), + 145,  - 35);
                     break;
 
                 case Horizontal:
@@ -819,32 +762,27 @@ public final class Guest extends Player implements IPlayer
                 default:
 
                     //draw status
-                    drawInfo(displayImageGraphics, "Books = ", + 85, + 30);
-                    drawInfo(displayImageGraphics, "Bet = ", + 185, + 30);
-                    drawInfo(displayImageGraphics, getName(), + 85,  + 50);
+                    drawInfo(tmp, "Books = ", + 85, + 30);
+                    drawInfo(tmp, "Bet = ", + 185, + 30);
+                    drawInfo(tmp, getName(), + 85,  + 50);
 
                     if (hasBet())
-                        drawInfo(displayImageGraphics, "" + getBet(), + 245, + 30);
+                        drawInfo(tmp, "" + getBet(), + 245, + 30);
 
                     if (hasTurn() && hasBet())
-                        drawInfo(displayImageGraphics, "(Playing)", + 185, + 50);
+                        drawInfo(tmp, "(Playing)", + 185, + 50);
 
                     if (getWin() < getBet())
-                        displayImageGraphics.setColor(Color.RED);
+                        tmp.setColor(Color.RED);
                     else
-                        displayImageGraphics.setColor(Color.GREEN);
+                        tmp.setColor(Color.GREEN);
 
-                    drawInfo(displayImageGraphics, "" + getWin(), + 145,  + 30);
+                    drawInfo(tmp, "" + getWin(), + 145,  + 30);
 
                     break;
             }
         }
         
-        super.draw(graphics, displayImage);
-    }
-    
-    private void drawInfo(final Graphics2D g2d, final String info, final double x, final double y)
-    {
-        g2d.drawString(info, (int)x, (int)y);
+        super.draw(graphics, getStatusImage());
     }
 }

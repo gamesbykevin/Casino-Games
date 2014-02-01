@@ -13,6 +13,7 @@ import com.gamesbykevin.casinogames.resources.GameImage.Keys;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public abstract class CardGame extends Sprite implements Disposable
@@ -36,7 +37,7 @@ public abstract class CardGame extends Sprite implements Disposable
     private List<Object> players;
     
     //this is a place holder for cards (example the central place where all players place their cards when playing spades)
-    private List<Hand> cardDestinations;
+    private LinkedHashMap<Object, Hand> cardDestinations;
     
     /**
      * Create a new card game
@@ -96,7 +97,7 @@ public abstract class CardGame extends Sprite implements Disposable
         this.players = new ArrayList<>();
         
         //create our card destination(s) list
-        this.cardDestinations = new ArrayList<>();
+        this.cardDestinations = new LinkedHashMap<Object, Hand>();
     }
     
     public void setStep(final Object step)
@@ -109,9 +110,14 @@ public abstract class CardGame extends Sprite implements Disposable
         return this.step;
     }
     
-    public List<Hand> getCardDestinations()
+    public Hand getCardDestination(final Object key)
     {
-        return this.cardDestinations;
+        return this.cardDestinations.get(key);
+    }
+    
+    public void addCardDestination(final Object key, final Hand hand)
+    {
+        this.cardDestinations.put(key, hand);
     }
     
     /**
@@ -137,6 +143,11 @@ public abstract class CardGame extends Sprite implements Disposable
     public List<Object> getPlayers()
     {
         return this.players;
+    }
+    
+    public void setTurn(final Object player)
+    {
+        setTurn(((Player)player).getId());
     }
     
     /**
@@ -189,17 +200,27 @@ public abstract class CardGame extends Sprite implements Disposable
             //if this is the player that has a turn
             if (player.hasTurn())
             {
+                //need to create new status image
+                player.resetStatusImage();
+                
                 //switch turn
                 player.switchTurn();
                 
+                Player nextPlayer;
+                
                 if (index == players.size() - 1)
                 {
-                    ((Player)getPlayer(0)).switchTurn();
+                    nextPlayer = ((Player)getPlayer(0));
                 }
                 else
                 {
-                    ((Player)getPlayer(index + 1)).switchTurn();
+                    nextPlayer = ((Player)getPlayer(index + 1));
                 }
+                
+                //need to create new status image
+                nextPlayer.resetStatusImage();
+                
+                nextPlayer.switchTurn();
                 
                 break;
             }
@@ -255,7 +276,7 @@ public abstract class CardGame extends Sprite implements Disposable
         }
     }
     
-    protected Deck getDeck()
+    public Deck getDeck()
     {
         return this.deck;
     }
@@ -263,16 +284,20 @@ public abstract class CardGame extends Sprite implements Disposable
     @Override
     public void dispose()
     {
-        image.flush();
+        if (image != null)
+            image.flush();
+        
         image = null;
         
-        deck.dispose();
+        if (deck != null)
+            deck.dispose();
+        
         deck = null;
         
         players.clear();
         players = null;
         
-        for (Hand hand : getCardDestinations())
+        for (Hand hand : cardDestinations.values())
         {
             if (hand != null)
                 hand.dispose();
@@ -286,14 +311,14 @@ public abstract class CardGame extends Sprite implements Disposable
     
     public void render(final Graphics graphics)
     {
-        //draw the deck first
-        getDeck().render(graphics);
-        
         //finally draw the destination(s)
-        for (Hand hand : getCardDestinations())
+        for (Hand hand : cardDestinations.values())
         {
             hand.render(graphics, getDeck().getImage());
         }
+        
+        //draw the deck
+        getDeck().render(graphics);
         
         for (Object player : getPlayers())
         {

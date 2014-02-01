@@ -40,10 +40,7 @@ public final class Options extends Layer implements LayerRules
         Audio audio = engine.getResources().getMenuAudio(MenuAudio.Keys.OptionChange);
         
         //add options
-        super.add(OptionKey.BoardDifficulty,        new BoardDifficulty(audio));
         super.add(OptionKey.Mode,                   new Mode(audio));
-        super.add(OptionKey.OpponentDifficulty,     new OpponentDifficulty(audio));
-        
         super.add(OptionKey.DeckSelection,          new DeckSelection(audio));
         
         //don't add sound option for now

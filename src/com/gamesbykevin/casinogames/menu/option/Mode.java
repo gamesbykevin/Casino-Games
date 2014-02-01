@@ -16,8 +16,8 @@ public final class Mode extends Option
         //Play Spades
         Spades, 
         
-        //Play Poker
-        Poker,
+        //Play Crazy 8s
+        Crazy8s,
     }
     
     public Mode(final Audio audio)
@@ -30,6 +30,6 @@ public final class Mode extends Option
         }
         
         //set default
-        super.setIndex(1);
+        super.setIndex(2);
     }
 }
